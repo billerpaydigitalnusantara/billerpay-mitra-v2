@@ -77,6 +77,7 @@ const DataTransaksi = () => {
             </div>
           </div>
           <Table
+            isHeaderSticky
             aria-label="Controlled table example with dynamic content"
             className="h-[calc(100vh-20rem)]"
             classNames={{ th: ["bg-primary text-white"] }}

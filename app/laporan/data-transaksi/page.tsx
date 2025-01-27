@@ -19,10 +19,19 @@ const dataColumns = [
   { key: "aksi", label: "Aksi" }
 ]
 
-const dataRows = [
-  { key: "1", waktu: "2021-10-10 10:10:10", produk: "PLN", id: "123456", nama: "Budi Sudarsono", reff: "123456", tagihan: "Rp. 200.000", admin: "Rp. 2.000", total: "Rp. 202.000", status: "Sukses", aksi: "Edit"},
-  { key: "2", waktu: "2021-10-10 10:10:10", produk: "PLN", id: "123456", nama: "Budi Sudarsono", reff: "123456", tagihan: "Rp. 200.000", admin: "Rp. 2.000", total: "Rp. 202.000", status: "Sukses", aksi: "Edit"}
-]
+const dataRows = Array.from({ length: 250 }, (_, index) => ({
+  key: (index + 1).toString(),
+  waktu: "2021-10-10 10:10:10",
+  produk: "PLN",
+  id: "123456",
+  nama: "Budi Sudarsono",
+  reff: "123456",
+  tagihan: "Rp. 200.000",
+  admin: "Rp. 2.000",
+  total: "Rp. 202.000",
+  status: "Sukses",
+  aksi: "Edit"
+}));
 
 const DataTransaksi = () => {
   return (
@@ -69,6 +78,7 @@ const DataTransaksi = () => {
           </div>
           <Table
             aria-label="Controlled table example with dynamic content"
+            className="h-[calc(100vh-20rem)]"
             classNames={{ th: ["bg-primary text-white"] }}
             bottomContent={
               <div className="flex justify-between items-center">

@@ -13,7 +13,7 @@ declare module "@react-types/shared" {
 
 export function Providers({children}: { children: React.ReactNode }) {
   const router = useRouter();
-  const useHref = (href: string) => process.env.BASE_PATH + href;
+  const useHref = (href: string) => process.env.BASE_URL + href;
 
   return (
       <NextUIProvider navigate={router.push} useHref={useHref}>

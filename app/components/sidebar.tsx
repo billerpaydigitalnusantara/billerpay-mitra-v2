@@ -1,53 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab, useDisclosure } from "@nextui-org/react";
 import { Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-interface IProductList {
-  id_product: number;
-  icon: string;
-  product: string;
-  code: string,
-  isActive: string,
-  mapProductDetail: string,
-  listProductDetail: Array<any>,
-  config: Array<any>,
-}
-
-interface IProductGridItem {
-  id_product: number;
-  icon: string;
-  product: string;
-  code: string,
-  isActive: string,
-  mapProductDetail: string,
-  listProductDetail: Array<any>,
-  config: Array<any>,
-}
-
-interface IProductGrid {
-  category: string;
-  product: Array<IProductGridItem>;
-}
+import ProductDetail from "./product-detail";
+import { ListProduct, GridProduct } from "@/types";
+import api from "@/lib/axios";
 
 const Sidebar = () => {
-  const [productsList, setProductsList] = useState([] as IProductList[]);
-  const [productsGrid, setProductsGrid] = useState([] as IProductGrid[]);
-  const [selected, setSelected] = useState("list");
+  const [productsList, setProductsList] = useState([] as ListProduct[]);
+  const [productsGrid, setProductsGrid] = useState([] as GridProduct[]);
+  const [selectedTabs, setSelectedTabs] = useState("list");
+  const [selectedProduct, setSelectedProduct] = useState({} as ListProduct);
+  const { isOpen: isOpenProductDetail, onOpen: onOpenProductDetail, onOpenChange: onOpenChangeProductDetail } = useDisclosure()
+
+  const onSelectedProduct = (product: ListProduct) => {
+    setSelectedProduct(product)
+    onOpenProductDetail()
+  }
  
   useEffect(() => {
     async function fetchProductsList() {
-      const res = await fetch('https://api.billerpay.id/core/public/index.php/KONFIG/PRODUCT_LIST/LIST')
-      const data = await res.json()
+      const res = await api.get('/KONFIG/PRODUCT_LIST/LIST')
+      const data = await res.data
       setProductsList(data)
     }
 
     async function fetchProductsGrid() {
-      const res = await fetch('https://api.billerpay.id/core/public/index.php/KONFIG/PRODUCT_LIST/WEB')
-      const data = await res.json()
+      const res = await api.get('/KONFIG/PRODUCT_LIST/WEB')
+      const data = await res.data
       setProductsGrid(data)
     }
 
@@ -57,13 +39,14 @@ const Sidebar = () => {
   
   return(
     <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] ml-4 p-4 space-y-4">
+      <ProductDetail isOpen={isOpenProductDetail} onOpenChange={onOpenChangeProductDetail} product={selectedProduct} />
       <div className="flex flex-col items-end">
         <Tabs 
           aria-label="options-layout" 
           color="primary" 
           variant="solid"
-          selectedKey={selected}
-          onSelectionChange={(key) => setSelected(key.toString())}
+          selectedKey={selectedTabs}
+          onSelectionChange={(key) => setSelectedTabs(key.toString())}
         >
           <Tab 
             value="list" 
@@ -76,14 +59,14 @@ const Sidebar = () => {
             className="w-full"
           >
             <div className="h-[calc(100vh-15rem)] overflow-y-auto space-y-2">
-              {productsList.map((product: IProductList) => (
-                <div key={product.id_product} className="flex items-center h-12 w-full rounded-lg border p-4 gap-4 cursor-pointer">
+              {productsList.map((product: ListProduct) => (
+                <div key={product.id_product} className="flex items-center h-12 w-full rounded-lg border p-4 gap-4 cursor-pointer" onClick={onSelectedProduct.bind(this, product)}>
                   {
                     product.icon === null ? (
                       <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
                     ) : (
                       <Image 
-                        src={product.icon}
+                        src={product.icon || ""}
                         alt="icon"
                         width={32}
                         height={32}
@@ -106,18 +89,18 @@ const Sidebar = () => {
             className="w-full"
           >
           <div className="max-h-[calc(100vh-15rem)] overflow-y-auto space-y-4">
-            {productsGrid.map((item: IProductGrid) => (
+            {productsGrid.map((item: GridProduct) => (
               <div key={item.category}>
                 <h2 className="text-lg font-semibold text-gray-600">{item.category}</h2>
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-4">
-                {item.product.map((product: IProductGridItem) => (
-                  <div key={product.id_product} className="flex flex-col h-28 items-center justify-start rounded-lg border p-4 gap-4 cursor-pointer">
+                {item.product.map((product: ListProduct) => (
+                  <div key={product.id_product} className="flex flex-col h-28 items-center justify-start rounded-lg border p-4 gap-4 cursor-pointer" onClick={onSelectedProduct.bind(this, product)}>
                     {
                       product.icon === null ? (
                         <div className="w-10 min-h-10 bg-gray-200 rounded-lg"></div>
                       ) : (
                         <Image 
-                          src={product.icon}
+                          src={product.icon || ""}
                           alt="icon"
                           width={40}
                           height={40}

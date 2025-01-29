@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   env: {
-    BASE_PATH: process.env.BASE_PATH,
+    BASE_URL: process.env.BASE_URL,
+    API_URL: process.env.API_URL,
   },
   images: {
     remotePatterns: [

@@ -12,7 +12,7 @@ import {
   Button,
   Checkbox,
   Input,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { ArrowPathIcon, PrinterIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format";
 

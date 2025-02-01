@@ -15,7 +15,7 @@ import {
   TableRow, 
   getKeyValue, 
   Divider
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MagnifyingGlassIcon, ArrowPathIcon, ClipboardDocumentIcon, PencilSquareIcon, TrashIcon, ArrowDownTrayIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { use } from "react";
 import { useRouter } from "next/navigation";

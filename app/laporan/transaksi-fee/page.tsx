@@ -2,7 +2,7 @@
 
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { Button, Card, CardBody, CardHeader, DateRangePicker, Divider, getKeyValue, Input, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@nextui-org/react";
+import { Button, Card, CardBody, CardHeader, DateRangePicker, Divider, getKeyValue, Input, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@heroui/react";
 import { ClipboardDocumentIcon, MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { today } from "@internationalized/date";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from "chart.js";

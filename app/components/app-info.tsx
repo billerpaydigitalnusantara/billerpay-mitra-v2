@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface AppInfoProps {

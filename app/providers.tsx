@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 
@@ -16,10 +16,10 @@ export function Providers({children}: { children: React.ReactNode }) {
   const useHref = (href: string) => process.env.BASE_URL + href;
 
   return (
-      <NextUIProvider navigate={router.push} useHref={useHref}>
+      <HeroUIProvider navigate={router.push} useHref={useHref}>
         <NextThemesProvider attribute="class" defaultTheme="light">
           {children}
         </NextThemesProvider>
-      </NextUIProvider>
+      </HeroUIProvider>
   );
 }

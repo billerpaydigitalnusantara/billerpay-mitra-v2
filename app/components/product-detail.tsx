@@ -9,9 +9,10 @@ import {
   Button,
   SelectItem,
   Select,
-  Input
-} from "@nextui-org/react";
-import { ListProduct, ListProductDetail } from "@/types";
+  Input,
+  SharedSelection
+} from "@heroui/react";
+import { Layout, ListProduct, ListProductDetail } from "@/types";
 import Image from "next/image";
 import { useState } from "react";
 import { NumericFormat } from "react-number-format";

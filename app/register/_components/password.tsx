@@ -1,7 +1,7 @@
 "use client";
 
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/outline";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import { useState } from "react";
 
 const Password = () => {

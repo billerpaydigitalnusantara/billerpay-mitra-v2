@@ -17,7 +17,7 @@ import {
   Pagination,
   Select,
   SelectItem
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MagnifyingGlassIcon, ArrowPathIcon, ClipboardDocumentIcon, ArrowUpTrayIcon, PlusIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 

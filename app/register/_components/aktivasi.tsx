@@ -1,7 +1,7 @@
 "use client";
 
 import { PhoneIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
-import { Button, Divider, Input, InputOtp } from "@nextui-org/react";
+import { Button, Divider, Input, InputOtp } from "@heroui/react";
 import React from "react";
 
 const Aktivasi = () => {

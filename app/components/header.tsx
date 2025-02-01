@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import ChangePassword from "./change-password";
 import AppInfo from "./app-info";
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, Badge, Popover, PopoverTrigger, PopoverContent, Button, Divider, useDisclosure } from "@nextui-org/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, Badge, Popover, PopoverTrigger, PopoverContent, Button, Divider, useDisclosure } from "@heroui/react";
 import { ChevronDownIcon, WalletIcon } from "@heroicons/react/16/solid";
 import { BellIcon, Cog6ToothIcon, PrinterIcon, ShieldCheckIcon, ComputerDesktopIcon, DocumentCheckIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";

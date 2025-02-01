@@ -4,7 +4,7 @@ import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { today } from "@internationalized/date";
 import { ArrowDownTrayIcon, ArrowPathIcon, ClipboardDocumentIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Table, Select, SelectItem, Pagination, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, getKeyValue, Divider, DateRangePicker, Input, Chip } from "@nextui-org/react";
+import { Table, Select, SelectItem, Pagination, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, getKeyValue, Divider, DateRangePicker, Input, Chip } from "@heroui/react";
 
 const dataColumns = [
   { key: "waktu", label: "Waktu Transaksi" },

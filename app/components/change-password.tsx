@@ -9,7 +9,7 @@ import {
   ModalFooter,
   Button,
   Input,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 

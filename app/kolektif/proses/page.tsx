@@ -19,7 +19,7 @@ import {
   Pagination,
   Select,
   SelectItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MagnifyingGlassIcon, ArrowPathIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 const prosesColumns = [

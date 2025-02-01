@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, Tab, useDisclosure } from "@nextui-org/react";
+import { Tabs, Tab, useDisclosure } from "@heroui/react";
 import { Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useEffect, useState } from "react";

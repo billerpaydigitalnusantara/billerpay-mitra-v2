@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowPathIcon, PrinterIcon } from "@heroicons/react/24/outline";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, getKeyValue } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, getKeyValue } from "@heroui/react";
 
 const dataColumns = [
   { key: "no", label: "No" },

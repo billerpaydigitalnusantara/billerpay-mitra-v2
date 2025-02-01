@@ -2,7 +2,7 @@
 
 import Header from "../components/header";
 import Footer from "../components/footer";
-import { Radio, RadioGroup, Select, SelectItem, Input, Button, Divider, Checkbox } from "@nextui-org/react";
+import { Radio, RadioGroup, Select, SelectItem, Input, Button, Divider, Checkbox } from "@heroui/react";
 import { PrinterIcon, ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format";
 

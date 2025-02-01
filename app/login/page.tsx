@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import Image from 'next/image'
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Autocomplete, AutocompleteItem, DatePicker, Select, SelectItem } from "@nextui-org/react";
+import { Button, Input, Autocomplete, AutocompleteItem, DatePicker, Select, SelectItem } from "@heroui/react";
 import React from "react";
 import { NumericFormat } from "react-number-format";
 

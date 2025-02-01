@@ -17,7 +17,7 @@ import {
   TableRow, 
   getKeyValue, 
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { PaperAirplaneIcon, MagnifyingGlassIcon, ArrowPathIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format"
 import { today } from "@internationalized/date";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 
 const Validasi = () => {
   return (

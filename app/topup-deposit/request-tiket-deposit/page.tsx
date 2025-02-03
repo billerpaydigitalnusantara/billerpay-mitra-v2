@@ -137,8 +137,11 @@ const RequestTiketDeposit = () => {
             </div>
           </div>
           <Table
-            aria-label="Controlled table example with dynamic content"
-            classNames={{ th: ["bg-primary text-white"] }}
+            isStriped
+            isHeaderSticky
+            removeWrapper
+            className="z-0"
+            classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
           >
             <TableHeader columns={columns}>
               {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

@@ -142,7 +142,7 @@ const Header = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-4">
+              <div className="flex items-center gap-2 p-4">
                 <Button size="sm">Tandai Semua Dibaca</Button>
                 <Button size="sm" color="primary">Lihat Selengkapnya</Button>
               </div>

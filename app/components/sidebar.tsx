@@ -28,7 +28,7 @@ const Sidebar = () => {
     }
 
     async function fetchProductsGrid() {
-      const res = await api.get('/KONFIG/PRODUCT_LIST/WEB')
+      const res = await api.get('/KONFIG/PRODUCT_LIST/COLUMN')
       const data = await res.data
       setProductsGrid(data)
     }
@@ -38,7 +38,7 @@ const Sidebar = () => {
   }, []);
   
   return(
-    <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] ml-4 p-4 space-y-4">
+    <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] ml-4 p-4 space-y-4 w-[calc(26vw)]">
       <ProductDetail isOpen={isOpenProductDetail} onOpenChange={onOpenChangeProductDetail} product={selectedProduct} />
       <div className="flex flex-col items-end">
         <Tabs 
@@ -92,7 +92,7 @@ const Sidebar = () => {
             {productsGrid.map((item: GridProduct) => (
               <div key={item.category}>
                 <h2 className="text-lg font-semibold text-gray-600">{item.category}</h2>
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-2 mt-4">
                 {item.product.map((product: ListProduct) => (
                   <div key={product.id_product} className="flex flex-col h-28 items-center justify-start rounded-lg border p-4 gap-4 cursor-pointer" onClick={onSelectedProduct.bind(this, product)}>
                     {

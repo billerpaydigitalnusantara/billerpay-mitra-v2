@@ -15,7 +15,27 @@ const mutasiColumns = [
 
 const mutasiRows = [
   { key: "1", waktu: "2021-10-10 10:10:10", keterangan: "Deposit", total: "Rp. 200.000", saldo: "Rp. 2.000.000"},
-  { key: "2", waktu: "2021-10-10 10:10:10", keterangan: "Penarikan", total: "Rp. 200.000", saldo: "Rp. 2.000.000"}
+  { key: "2", waktu: "2021-10-10 10:10:10", keterangan: "Penarikan", total: "Rp. 200.000", saldo: "Rp. 2.000.000"},
+  { key: "3", waktu: "2021-10-11 11:11:11", keterangan: "Deposit", total: "Rp. 300.000", saldo: "Rp. 2.300.000"},
+  { key: "4", waktu: "2021-10-12 12:12:12", keterangan: "Penarikan", total: "Rp. 100.000", saldo: "Rp. 2.200.000"},
+  { key: "5", waktu: "2021-10-13 13:13:13", keterangan: "Deposit", total: "Rp. 500.000", saldo: "Rp. 2.700.000"},
+  { key: "6", waktu: "2021-10-14 14:14:14", keterangan: "Penarikan", total: "Rp. 200.000", saldo: "Rp. 2.500.000"},
+  { key: "7", waktu: "2021-10-15 15:15:15", keterangan: "Deposit", total: "Rp. 400.000", saldo: "Rp. 2.900.000"},
+  { key: "8", waktu: "2021-10-16 16:16:16", keterangan: "Penarikan", total: "Rp. 300.000", saldo: "Rp. 2.600.000"},
+  { key: "9", waktu: "2021-10-17 17:17:17", keterangan: "Deposit", total: "Rp. 600.000", saldo: "Rp. 3.200.000"},
+  { key: "10", waktu: "2021-10-18 18:18:18", keterangan: "Penarikan", total: "Rp. 400.000", saldo: "Rp. 2.800.000"},
+  { key: "11", waktu: "2021-10-19 19:19:19", keterangan: "Deposit", total: "Rp. 700.000", saldo: "Rp. 3.500.000"},
+  { key: "12", waktu: "2021-10-20 20:20:20", keterangan: "Penarikan", total: "Rp. 500.000", saldo: "Rp. 3.000.000"},
+  { key: "13", waktu: "2021-10-21 21:21:21", keterangan: "Deposit", total: "Rp. 800.000", saldo: "Rp. 3.800.000"},
+  { key: "14", waktu: "2021-10-22 22:22:22", keterangan: "Penarikan", total: "Rp. 600.000", saldo: "Rp. 3.200.000"},
+  { key: "15", waktu: "2021-10-23 23:23:23", keterangan: "Deposit", total: "Rp. 900.000", saldo: "Rp. 4.100.000"},
+  { key: "16", waktu: "2021-10-24 00:00:00", keterangan: "Penarikan", total: "Rp. 700.000", saldo: "Rp. 3.400.000"},
+  { key: "17", waktu: "2021-10-25 01:01:01", keterangan: "Deposit", total: "Rp. 1.000.000", saldo: "Rp. 4.400.000"},
+  { key: "18", waktu: "2021-10-26 02:02:02", keterangan: "Penarikan", total: "Rp. 800.000", saldo: "Rp. 3.600.000"},
+  { key: "19", waktu: "2021-10-27 03:03:03", keterangan: "Deposit", total: "Rp. 1.100.000", saldo: "Rp. 4.700.000"},
+  { key: "20", waktu: "2021-10-28 04:04:04", keterangan: "Penarikan", total: "Rp. 900.000", saldo: "Rp. 3.800.000"},
+  { key: "21", waktu: "2021-10-29 05:05:05", keterangan: "Deposit", total: "Rp. 1.200.000", saldo: "Rp. 5.000.000"},
+  { key: "22", waktu: "2021-10-30 06:06:06", keterangan: "Penarikan", total: "Rp. 1.000.000", saldo: "Rp. 4.000.000"}
 ]
 
 const MutasiSaldo = () => {
@@ -45,8 +65,11 @@ const MutasiSaldo = () => {
             </div>
           </div>
           <Table
-            aria-label="Controlled table example with dynamic content"
-            classNames={{ th: ["bg-primary text-white"] }}
+            isStriped
+            isHeaderSticky
+            removeWrapper
+            className="h-[calc(100vh-20rem)] z-0"
+            classNames={{ base: ["overflow-y-scroll overflow-x-hidden"], th: ["bg-primary text-white"] }}
             bottomContent={
               <div className="flex justify-between items-center">
                 <Select placeholder="10" className="w-24" variant="bordered">

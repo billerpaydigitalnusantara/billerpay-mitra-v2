@@ -24,8 +24,11 @@ const ProsesData = () => {
     <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] mr-4 p-4">
       <div className="h-[calc(100vh-11rem)] flex flex-col gap-6 justify-between">
         <Table
-          aria-label="Controlled table example with dynamic content"
-          classNames={{ th: ["bg-primary text-white"] }}
+          isStriped
+          isHeaderSticky
+          removeWrapper
+          className="z-0"
+          classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
           selectionMode="multiple"
           color="default"
         >

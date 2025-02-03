@@ -31,6 +31,26 @@ const columns = [
 const rows = [
   { key: "1", no: "1", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
   { key: "2", no: "2", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "3", no: "3", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "4", no: "4", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "5", no: "5", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "6", no: "6", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "7", no: "7", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "8", no: "8", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "9", no: "9", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "10", no: "10", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "11", no: "11", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "12", no: "12", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "13", no: "13", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "14", no: "14", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "15", no: "15", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "16", no: "16", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "17", no: "17", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "18", no: "18", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "19", no: "19", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "20", no: "20", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "21", no: "21", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" },
+  { key: "22", no: "22", product: "PLN", idPel: "1234567890", nama: "Budi", tagihan: "100000", admin: "2500", totalTagihan: "102500", status: "Lunas", aksi: "Bayar" }
 ];
 
 const Main = () => {
@@ -38,13 +58,16 @@ const Main = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   return (
-    <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] mr-4 p-4 flex flex-col justify-between">
+    <div className="bg-white rounded-lg h-[calc(100vh-4rem-3rem-2rem)] mr-4 p-4 flex flex-col gap-4 justify-between">
       <Table
-        aria-label="Controlled table example with dynamic content"
+        isStriped
+        isHeaderSticky
+        removeWrapper
+        className="z-0"
+        classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
         selectedKeys={selectedKeys}
         selectionMode="multiple"
         onSelectionChange={(keys) => setSelectedKeys(keys as Set<string>)}
-        classNames={{ th: [ "bg-primary", "text-white" ] }}
         color="default"
       >
         <TableHeader columns={columns}>

@@ -19,4 +19,10 @@ const formatToCurrency = (value: string | number, locale: string = "id-ID", curr
   }).format(numericValue);
 }
 
-export { formatToCurrency }
+const formatThousands = (number: string | number): string => {
+  const num = typeof number === 'string' ? parseInt(number, 10) : number
+  if (isNaN(num)) return "Invalid number";
+  return num.toLocaleString("id-ID"); 
+}
+
+export { formatToCurrency, formatThousands }

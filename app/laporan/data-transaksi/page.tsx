@@ -79,11 +79,11 @@ const DataTransaksi = () => {
           <Table
             isStriped
             isHeaderSticky
-            aria-label="Controlled table example with dynamic content"
-            className="h-[calc(100vh-20rem)]"
-            classNames={{ th: ["bg-primary text-white"] }}
+            removeWrapper
+            className="h-[calc(100vh-20rem)] z-0"
+            classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
             bottomContent={
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center sticky bottom-0 bg-white p-2">
                 <Select placeholder="10" className="w-24" variant="bordered">
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>

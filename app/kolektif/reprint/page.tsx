@@ -63,8 +63,11 @@ const ReprintKolektif = () => {
             </div>
           </div>
           <Table
-            aria-label="Controlled table example with dynamic content"
-            classNames={{ th: ["bg-primary text-white"] }}
+            isStriped
+            isHeaderSticky
+            removeWrapper
+            className="z-0"
+            classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
             bottomContent={
               <div className="flex justify-between">
                 <Select placeholder="10" className="w-24" variant="bordered">

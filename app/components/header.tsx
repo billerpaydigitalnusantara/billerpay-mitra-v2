@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from 'next/link';
 import ChangePassword from "./change-password";
@@ -8,12 +8,30 @@ import AppInfo from "./app-info";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, Badge, Popover, PopoverTrigger, PopoverContent, Button, Divider, useDisclosure } from "@heroui/react";
 import { ChevronDownIcon, WalletIcon } from "@heroicons/react/16/solid";
 import { BellIcon, Cog6ToothIcon, PrinterIcon, ShieldCheckIcon, ComputerDesktopIcon, DocumentCheckIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import Cookies from 'js-cookie'
+import api from "@/lib/axios";
+import { NotificationResponse } from "@/types";
 
 const Header = () => {
   const {isOpen: isOpenPassword, onOpen: onOpenPassword, onOpenChange: onOpenChangePassword} = useDisclosure();
   const {isOpen: isOpenApp, onOpen: onOpenApp, onOpenChange: onOpenChangeApp} = useDisclosure();
+  const [notifMessage, setNotifMessage] = useState<NotificationResponse>({} as NotificationResponse)
   const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    async function fetch() {
+      const pages = {
+        page: 1,
+        perPage: 10
+      }
+      const response = await api.post('/REQUEST/act/REPORT_PAGING/rpaging_log_notification/WEB', { pages })
+      setNotifMessage(response.data)
+    }
+
+    fetch()
+  }, [])
 
   const handleClick = async () => {
     const response = await fetch('https://api.billerpay.id/sertifikat/index.php?noid=123456');
@@ -25,6 +43,14 @@ const Header = () => {
     link.click();
     window.URL.revokeObjectURL(url);
   };
+
+  const onHandleLogout = () => {
+    Cookies.remove('token')
+    Cookies.remove('appid')
+    Cookies.remove('noid')
+    Cookies.remove('username')
+    router.push('/login')
+  }
 
   return (
     <header className="bg-white w-full h-16 shadow-lg flex justify-between items-center px-4 md:px-24 col-span-2">
@@ -109,38 +135,23 @@ const Header = () => {
               </div>
               <Divider/>
               <div className="p-4 overflow-y-auto h-[270px]">
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2 text-gray-600">
-                    <div className="text-xs">14 Jan 2025</div>
-                    <div className="text-xs">10.00</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-gray-600">Informasi Tagihan !!</div>
-                    <div className="text-xs text-gray-700">Mitra Billerpay, Demi kelancaran transaksi segera stor tagihan sebelum jam 12.00 WIB</div>
-                  </div>
-                </div>
-                <Divider className="my-4"/>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2 text-gray-600">
-                    <div className="text-xs">14 Jan 2025</div>
-                    <div className="text-xs">10.00</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-gray-600">Informasi Tagihan !!</div>
-                    <div className="text-xs text-gray-700">Mitra Billerpay, Demi kelancaran transaksi segera stor tagihan sebelum jam 12.00 WIB</div>
-                  </div>
-                </div>
-                <Divider className="my-4"/>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2 text-gray-600">
-                    <div className="text-xs">14 Jan 2025</div>
-                    <div className="text-xs">10.00</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-gray-600">Informasi Tagihan !!</div>
-                    <div className="text-xs text-gray-700">Mitra Billerpay, Demi kelancaran transaksi segera stor tagihan sebelum jam 12.00 WIB</div>
-                  </div>
-                </div>
+                {
+                  notifMessage.data?.map((notif, index) => (
+                    <div key={notif.id}>
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2 text-gray-600">
+                          <div className="text-xs">{notif.time.split(' ')[0]}</div>
+                          <div className="text-xs">{notif.time.split(' ')[1]}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-gray-600">{notif.tittle}</div>
+                          <div className="text-xs text-gray-700">{notif.message}</div>
+                        </div>
+                      </div>
+                      <Divider className={`my-4 ${notifMessage.data.length === (index+1) ? 'hidden' : ''}`}/>
+                    </div>
+                  ))
+                }
               </div>
               <div className="flex items-center gap-2 p-4">
                 <Button size="sm">Tandai Semua Dibaca</Button>
@@ -168,7 +179,7 @@ const Header = () => {
             </div>
           </DropdownTrigger>
           <DropdownMenu>
-            <DropdownItem key="logout" startContent={<ArrowLeftStartOnRectangleIcon className="size-5" />}>Logout</DropdownItem>
+            <DropdownItem onPress={onHandleLogout} key="logout" startContent={<ArrowLeftStartOnRectangleIcon className="size-5" />}>Logout</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </div>

@@ -64,3 +64,43 @@ export interface PayloadDetail {
 export interface Payload {
   noid?: string
 }
+
+export interface UserInfo {
+  status: string
+  tipe: string
+  noid: string
+  jenis: string
+  nama: string
+  saldo: string
+  token: string
+  informasi: string
+  appid: string
+  versi: string
+  interface: string
+  message: string
+  username: string
+  merchant: string
+  alamat: string
+  jenis_member: string
+  poin: string
+  status_aktivasi: string
+  info_aktivasi: string
+  hak_saldo: string
+  hak_plafon: number
+  hak_saldo_upline: string
+}
+
+export interface NotificationResponse {
+  page: number
+  totalData: string
+  data: DataNotification[]
+}
+
+export interface DataNotification {
+  id: string
+  time: string
+  tittle: string
+  message: string
+  media: string
+  stat: string
+}

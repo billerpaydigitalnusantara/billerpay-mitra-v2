@@ -1,24 +1,76 @@
 "use client";
 
-import React from "react";
-import { Button, Input } from "@heroui/react";
-import Image from 'next/image'
+import React, { useEffect, useState } from "react";
+import { Button, Divider, Input, Link } from "@heroui/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import api from "@/lib/axios";
+import { v4 as uuidv4 } from "uuid"
+import Cookies from "js-cookie"
+import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
-  const [isVisible, setIsVisible] = React.useState(false);
+  const router = useRouter()
+  const [isVisible, setIsVisible] = useState(false);
+  const [clientInfo, setClientInfo] = useState([])
   const toggleVisibility = () => setIsVisible(!isVisible);
+
+  useEffect(() => {
+    async function fetch() {
+      const res = await api.get('https://us1.api-bdc.net/data/client-info')
+      setClientInfo(res.data)
+    }
+    fetch()
+  }, [])
+
+  const onHandleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formElements = event.currentTarget.elements as HTMLFormControlsCollection
+    const data = {
+      tipe: 'LOGIN',
+      username: (formElements.namedItem('username') as HTMLInputElement)?.value,
+      password: (formElements.namedItem('password') as HTMLInputElement)?.value,
+      appid: uuidv4().replace(/-/g, ''),
+      website: 'transaksi',
+      detail: clientInfo
+    }
+
+    try {
+      const response = await api.post('/LOGIN/LOGIN_V2/WEB', data)
+
+      if(response.data.status === 'SUKSESLOGIN') {
+        const {token, appid, noid, username } = response.data
+        Cookies.set('token', token)
+        Cookies.set('noid', noid)
+        Cookies.set('appid', appid)
+        Cookies.set('username', username)
+        router.push('/')
+      }
+
+      if(response.data.status === 'GAGAL') {
+        toast(response.data.message)
+      }
+      
+    } catch (error) {
+      const err = error as AxiosError
+      if(err.status && err.status >= 500) {
+        toast('Terjadi kesalahan sistem')
+      }
+    }
+  }
 
   return (
     <div className="h-screen pl-4 pr-4 md:px-32 bg-primary-50">
-        <div className="absolute left-[50%] translate-x-[-50%] top-24 lg:top-12 lg:left-48">
-          <Image
-            src="/images/logo_billerpay.png"
-            width={150}
-            height={0}
-            alt="Download playstore"
-          />
-        </div>
+      <div className="absolute left-[50%] translate-x-[-50%] top-24 lg:top-12 lg:left-48">
+        <Image
+          src="/images/logo_billerpay.png"
+          width={150}
+          height={0}
+          alt="Download playstore"
+        />
+      </div>
       <div className="flex h-full items-center justify-center lg:justify-between">
         <div className="w-96 hidden lg:block">
           <h2 className="font-bold text-2xl">Selamat Datang</h2>
@@ -44,20 +96,21 @@ const LoginPage = () => {
         </div>
         <div className="w-full max-w-md p-8 space-y-8 rounded-lg bg-white shadow-lg">
           <h2 className="text-2xl font-bold text-center">Login</h2>
-          <form className="mt-8 space-y-6">
+          <form className="mt-8 space-y-6" onSubmit={onHandleLogin}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="email-address" className="sr-only">
-                  Email address
+                <label htmlFor="username" className="sr-only">
+                  Username
                 </label>
                 <Input
-                  label="Email"
-                  placeholder="Enter Email address"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  label="Username"
+                  placeholder="Masukan Username"
+                  autoComplete="username"
+                  type="text"
                   size="md"
                   variant="flat"
-                  required
+                  isRequired
                 />
               </div>
               <div>
@@ -65,6 +118,7 @@ const LoginPage = () => {
                   Password
                 </label>
                 <Input
+                  id="password"
                   endContent={
                     <button
                       aria-label="toggle password visibility"
@@ -81,11 +135,11 @@ const LoginPage = () => {
                   }
                   type={isVisible ? "text" : "password"}
                   label="Password"
-                  placeholder="Enter your password"
+                  placeholder="Masukan Password"
                   size="md"
                   variant="flat"
-                  autoComplete="current-password"
-                  required
+                  autoComplete="password"
+                  isRequired
                 />
               </div>
             </div>
@@ -99,10 +153,12 @@ const LoginPage = () => {
               </Button>
             </div>
           </form>
-          <div className="w-full text-center">
-            <label className="">
+          <div className="w-full text-center flex flex-col gap-4">
+            <label className="text-gray-600 text-sm">
               Butuh bantuan? Hubungi CS  <a href="https://wa.me/6281333301320" target="_blank"><strong className="font-bold text-primary-600">0813-3330-1320</strong></a> 
             </label>
+            <Divider />
+            <span className="text-sm font-medium text-gray-600">Belum punya akun? <Link href="/register" className="text-sm">Daftar disini</Link></span>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import Cookies from 'js-cookie';
 const baseURL = process.env.API_URL || 'http://localhost:3000';
 
 const api = axios.create({
@@ -13,11 +13,26 @@ const api = axios.create({
 // Interceptor for request
 api.interceptors.request.use(
   (config) => {
-    // Example: Add authorization token if needed
-    const token = localStorage.getItem('token'); // Or retrieve token from cookies, etc.
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = Cookies.get('token')
+      const noid = Cookies.get('noid')
+      const appid = Cookies.get('appid')
+      const username = Cookies.get('username')
+
+      if (token && noid && appid && username) {
+        if (config.method === 'post' || config.method === 'put' || config.method === 'patch') {
+          config.data = {
+            ...config.data,
+            noid,
+            appid,
+            username,
+            token,
+            versi: 'V2'
+          };
+        }
+      }
     }
+
     return config;
   },
   (error) => {

@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
   const username = request.cookies.get('username')?.value;
 
   // Exclude Next.js static files and API routes from middleware processing
-  if (request.nextUrl.pathname.startsWith('/_next/') || request.nextUrl.pathname.startsWith('/api/')) {
+  if (request.nextUrl.pathname.startsWith('/_next/') || request.nextUrl.pathname.startsWith('/images/') || request.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 

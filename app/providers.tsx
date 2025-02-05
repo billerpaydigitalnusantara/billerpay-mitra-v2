@@ -16,7 +16,7 @@ export function Providers({children}: { children: React.ReactNode }) {
   const useHref = (href: string) => process.env.BASE_URL + href;
 
   return (
-      <HeroUIProvider navigate={router.push} useHref={useHref}>
+      <HeroUIProvider locale="en-ID" navigate={router.push} useHref={useHref}>
         <NextThemesProvider attribute="class" defaultTheme="light">
           {children}
         </NextThemesProvider>

@@ -92,7 +92,7 @@ const RowSteps = React.forwardRef<HTMLButtonElement, RowStepsProps>(
     },
     ref,
   ) => {
-    const [currentStep, setCurrentStep] = useControlledState(
+    const [currentStep] = useControlledState(
       currentStepProp,
       defaultStep,
       onStepChange,
@@ -168,7 +168,6 @@ const RowSteps = React.forwardRef<HTMLButtonElement, RowStepsProps>(
                     "group flex w-full cursor-pointer flex-row items-center justify-center gap-x-3 rounded-large py-2.5",
                     stepClassName,
                   )}
-                  onClick={() => setCurrentStep(stepIdx)}
                   {...props}
                 >
                   <div className="h-ful relative flex items-center">

@@ -104,3 +104,34 @@ export interface DataNotification {
   media: string
   stat: string
 }
+
+export interface DataTrxResponse {
+  page: number,
+  recordsTotal: string,
+  data: DataTrx[]
+  statTotal: StatTotal
+}
+
+export interface StatTotal {
+  gagal: string,
+  pending: string,
+  sukses: string
+}
+
+export interface DataTrx {
+  id_trx: string
+  noid: string
+  nama_member: string
+  alias: string
+  time: string
+  product: string
+  idpel: string
+  nama: string
+  lembar: string
+  tagihan: string
+  admin: string
+  total: string
+  reff: string
+  reffpay: string
+  status: string
+}

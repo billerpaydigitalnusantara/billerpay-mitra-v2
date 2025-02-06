@@ -1,7 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { redirect } from 'next/navigation';
+import toast from 'react-hot-toast';
 const baseURL = process.env.API_URL || 'http://localhost:3000';
-
 const api = axios.create({
   baseURL: baseURL,
   timeout: 10000,
@@ -42,7 +43,17 @@ api.interceptors.request.use(
 
 // Interceptor for response
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if(response.data.response_code === '0111'){
+      Cookies.remove('token')
+      Cookies.remove('appid')
+      Cookies.remove('noid')
+      Cookies.remove('username')
+      toast(response.data.response_message)
+      redirect('/login')
+    }
+    return response
+  },
   (error) => {
     // Handle errors globally (e.g., unauthorized, server errors)
     if (error.response) {

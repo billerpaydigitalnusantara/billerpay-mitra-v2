@@ -135,3 +135,21 @@ export interface DataTrx {
   reffpay: string
   status: string
 }
+
+export interface DataMutasiResponse {
+  page: number,
+  recordsTotal: string,
+  data: DataMutasi[]
+}
+
+export interface DataMutasi {
+  id_trx: string
+  noid: string
+  nama_member: string
+  alias: string
+  time: string
+  keterangan: string
+  total: string
+  saldo: string
+  status: string
+}

@@ -16,7 +16,7 @@ const dataColumns = [
   { key: "time", label: "Waktu Transaksi" },
   { key: "product", label: "Produk" },
   { key: "idpel", label: "ID Pel" },
-  { key: "nama_member", label: "Nama" },
+  { key: "nama", label: "Nama" },
   { key: "reff", label: "Reff" },
   { key: "tagihan", label: "Tagihan" },
   { key: "admin", label: "Admin" },
@@ -87,10 +87,10 @@ const DataTransaksi = () => {
 
     const pages = {
       page: page,
-      perPage: "20"
+      perPage: parseInt(perPage)
     }
     
-    const response = await api.post('REQUEST/act/REPORT_PAGING/rpaging_data_trx/WEB', { filters, pages })
+    const response = await api.post('/REQUEST/act/REPORT_PAGING/rpaging_data_trx/WEB', { filters, pages })
     const data: DataTrxResponse = response.data
     setTotalPage(Math.ceil(parseInt(data.recordsTotal || "0") / parseInt(perPage)))
     setDataTrx(data)
@@ -224,11 +224,23 @@ const DataTransaksi = () => {
           ) : null
         )
       case "admin":
-          return formatToCurrency(cellValue)
+          return (
+            <div className="text-right">
+              {formatToCurrency(cellValue)}
+            </div>
+          )
       case "tagihan":
-          return formatToCurrency(cellValue)
+          return (
+            <div className="text-right">
+              {formatToCurrency(cellValue)}
+            </div>
+          )
       case "total":
-        return formatToCurrency(cellValue)
+          return (
+            <div className="text-right">
+              {formatToCurrency(cellValue)}
+            </div>
+          )
       case "status":
           return (
             <Chip className="capitalize" color={cellValue === 'SUKSES' ? 'success' : 'danger'} size="sm" variant="flat">

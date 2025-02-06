@@ -2,43 +2,163 @@
 
 import Footer from "@/components/footer";
 import Header from "@/components/header";
-import { today } from "@internationalized/date";
-import { ArrowDownTrayIcon, ArrowPathIcon, ClipboardDocumentIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Table, Select, SelectItem, Pagination, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, getKeyValue, Divider, DateRangePicker, Input } from "@heroui/react";
+import { CalendarDate, today } from "@internationalized/date";
+import { ArrowDownTrayIcon, ArrowPathIcon, ClipboardDocumentIcon, MagnifyingGlassIcon} from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { Table, Select, SelectItem, Pagination, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, Divider, DateRangePicker, Input, SharedSelection, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { useCallback, useEffect, useState } from "react";
+import { DataMutasi, DataMutasiResponse } from "@/types";
+import api from "@/lib/axios";
+import { debounce } from "lodash";
+import jsonToClipboard from "@/utils/json-to-cllipboard";
+import { formatThousands } from "@/utils/formatter";
 
 const mutasiColumns = [
-  { key: "waktu", label: "Waktu Transaksi" },
+  { key: "time", label: "Waktu Transaksi" },
   { key: "keterangan", label: "Keterangan" },
   { key: "total", label: "Total" },
   { key: "saldo", label: "Saldo" }
 ]
 
-const mutasiRows = [
-  { key: "1", waktu: "2021-10-10 10:10:10", keterangan: "Deposit", total: "Rp. 200.000", saldo: "Rp. 2.000.000"},
-  { key: "2", waktu: "2021-10-10 10:10:10", keterangan: "Penarikan", total: "Rp. 200.000", saldo: "Rp. 2.000.000"},
-  { key: "3", waktu: "2021-10-11 11:11:11", keterangan: "Deposit", total: "Rp. 300.000", saldo: "Rp. 2.300.000"},
-  { key: "4", waktu: "2021-10-12 12:12:12", keterangan: "Penarikan", total: "Rp. 100.000", saldo: "Rp. 2.200.000"},
-  { key: "5", waktu: "2021-10-13 13:13:13", keterangan: "Deposit", total: "Rp. 500.000", saldo: "Rp. 2.700.000"},
-  { key: "6", waktu: "2021-10-14 14:14:14", keterangan: "Penarikan", total: "Rp. 200.000", saldo: "Rp. 2.500.000"},
-  { key: "7", waktu: "2021-10-15 15:15:15", keterangan: "Deposit", total: "Rp. 400.000", saldo: "Rp. 2.900.000"},
-  { key: "8", waktu: "2021-10-16 16:16:16", keterangan: "Penarikan", total: "Rp. 300.000", saldo: "Rp. 2.600.000"},
-  { key: "9", waktu: "2021-10-17 17:17:17", keterangan: "Deposit", total: "Rp. 600.000", saldo: "Rp. 3.200.000"},
-  { key: "10", waktu: "2021-10-18 18:18:18", keterangan: "Penarikan", total: "Rp. 400.000", saldo: "Rp. 2.800.000"},
-  { key: "11", waktu: "2021-10-19 19:19:19", keterangan: "Deposit", total: "Rp. 700.000", saldo: "Rp. 3.500.000"},
-  { key: "12", waktu: "2021-10-20 20:20:20", keterangan: "Penarikan", total: "Rp. 500.000", saldo: "Rp. 3.000.000"},
-  { key: "13", waktu: "2021-10-21 21:21:21", keterangan: "Deposit", total: "Rp. 800.000", saldo: "Rp. 3.800.000"},
-  { key: "14", waktu: "2021-10-22 22:22:22", keterangan: "Penarikan", total: "Rp. 600.000", saldo: "Rp. 3.200.000"},
-  { key: "15", waktu: "2021-10-23 23:23:23", keterangan: "Deposit", total: "Rp. 900.000", saldo: "Rp. 4.100.000"},
-  { key: "16", waktu: "2021-10-24 00:00:00", keterangan: "Penarikan", total: "Rp. 700.000", saldo: "Rp. 3.400.000"},
-  { key: "17", waktu: "2021-10-25 01:01:01", keterangan: "Deposit", total: "Rp. 1.000.000", saldo: "Rp. 4.400.000"},
-  { key: "18", waktu: "2021-10-26 02:02:02", keterangan: "Penarikan", total: "Rp. 800.000", saldo: "Rp. 3.600.000"},
-  { key: "19", waktu: "2021-10-27 03:03:03", keterangan: "Deposit", total: "Rp. 1.100.000", saldo: "Rp. 4.700.000"},
-  { key: "20", waktu: "2021-10-28 04:04:04", keterangan: "Penarikan", total: "Rp. 900.000", saldo: "Rp. 3.800.000"},
-  { key: "21", waktu: "2021-10-29 05:05:05", keterangan: "Deposit", total: "Rp. 1.200.000", saldo: "Rp. 5.000.000"},
-  { key: "22", waktu: "2021-10-30 06:06:06", keterangan: "Penarikan", total: "Rp. 1.000.000", saldo: "Rp. 4.000.000"}
-]
+interface Filters {
+  end_date: string,
+  end_time: string,
+  search: string,
+  start_date: string,
+  start_time: string,
+}
 
 const MutasiSaldo = () => {
+  const [startDate, setStartDate] = useState<CalendarDate>(today('Asia/Jakarta').subtract({ days: 14 }))
+  const [endDate, setEndDate] = useState<CalendarDate>(today('Asia/Jakarta'))
+  const [page, setPage] = useState<number>(1)
+  const [perPage, setPerPage] = useState<string>("20")
+  const [totalPage, setTotalPage] = useState<number>(1)
+  const [search, setSearch] = useState<string>("")
+  // const [status, setStatus] = useState<string>("ALL")
+  const [dataMutasi, setDataMutasi] = useState<DataMutasiResponse>({} as DataMutasiResponse)
+
+  const fetchDataMutasi = async () => {
+    const filters: Filters = {
+      end_date: endDate.toString(),
+      end_time: "23:59:00",
+      search: search,
+      start_date: startDate.toString(),
+      start_time: "00:00:00"
+    }
+
+    const pages = {
+      page: page,
+      perPage: parseInt(perPage)
+    }
+
+    const response = await api.post('/REQUEST/act/REPORT_PAGING/rpaging_mutasi_saldo/WEB', { filters, pages })
+    const data: DataMutasiResponse = response.data
+    setTotalPage(Math.ceil(parseInt(data.recordsTotal || "0") / parseInt(perPage)))
+    setDataMutasi(data)
+  }
+
+  useEffect(() => {
+    fetchDataMutasi()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, perPage, search])
+
+  useEffect(() => {
+    setPage(1)
+  }, [perPage, search])
+
+  const onHandleApplyFilter = () => {
+    fetchDataMutasi()
+  }
+
+  const onHandleReload = () => {
+    fetchDataMutasi()
+  }
+
+  const onHandleSearch = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value)
+  }, 500)
+
+  const onHanleSelectPerPage = (keys: SharedSelection) => {
+    if (keys.currentKey) {
+      setPerPage(keys.currentKey);
+    }
+  }
+
+  const onHandleCopyClipboard = () => {
+    jsonToClipboard(dataMutasi.data)
+  }
+
+  const fetchDownloadFileExcel = async (url: string, filename: string) => {
+    const filters: Filters = {
+      end_date: endDate.toString(),
+      end_time: "23:59:00",
+      search: search,
+      start_date: startDate.toString(),
+      start_time: "00:00:00"
+    }
+
+    const response = await api.post(url, { filters }, {
+      responseType: "blob"
+    })
+
+     // Create a blob URL
+     const blob = new Blob([response.data]);
+     const link = document.createElement("a");
+     link.href = window.URL.createObjectURL(blob);
+     link.download = filename;
+     
+     // Append, trigger download, and clean up
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+     window.URL.revokeObjectURL(link.href);
+  }
+
+  const onHandleDownloadExcel = () => {
+    fetchDownloadFileExcel('/CreateReportXLS/act/EXCEL/report_mutasi_saldo/WEB', 'report_mutasi_saldo.xls')
+  }
+
+  const renderCell = useCallback((trx: DataMutasi, columnKey: React.Key) => {
+    const cellValue = trx[columnKey as keyof DataMutasi];
+
+    switch (columnKey) {
+      case "keterangan":
+        return (
+          <div className="flex gap-2">
+            <div className={`size-4 rounded-full ${ trx['status'] === '1' ? 'bg-green-600' : trx['status'] === '2' ? 'bg-red-600' : 'bg-orange-600' }`}/>
+            <div>
+              {cellValue}
+            </div>
+          </div>
+        )
+      case "total":
+        return (
+          <div className="flex gap-2 items-center justify-end w-full">
+            <div className={parseInt(cellValue) >= 0 ? 'text-green-600' : 'text-red-600'}>
+              Rp {formatThousands(cellValue)}
+            </div>
+            {
+              parseInt(cellValue) >= 0 ? (
+                <ChevronLeftIcon className="size-4 text-green-600" />
+              ) : (
+                <ChevronRightIcon className="size-4  text-red-600" />
+              )
+            }
+          </div>
+        )
+      case "saldo":
+          return (
+            <div className={`text-right ${parseInt(cellValue) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              Rp {formatThousands(cellValue)}
+            </div>
+          )
+      default:
+        return cellValue
+    }
+  }, [])
+
+  
   return (
     <div className="bg-gray-100 w-full min-h-screen grid grid-cols-[1fr] grid-rows-[1fr, 2fr, 1fr] gap-4">
       <Header />
@@ -51,17 +171,30 @@ const MutasiSaldo = () => {
               <DateRangePicker 
                 className="max-w-60"
                 defaultValue={{
-                  start: today('Asia/Jakarta').subtract({ days: 14 }),
-                  end: today('Asia/Jakarta'),
+                  start: startDate,
+                  end: endDate,
+                }} 
+                onChange={(value) => {
+                  if(value) {
+                    setStartDate(value?.start)
+                    setEndDate(value?.end)
+                  }
                 }} 
               />
-              <Button color="primary">Terapkan</Button>
+              <Button color="primary" onPress={onHandleApplyFilter}>Terapkan</Button>
             </div>
             <div className="flex gap-2">
-              <Button variant="bordered" color="primary" isIconOnly startContent={<ArrowDownTrayIcon className="size-5"/>} />
-              <Button variant="bordered" color="default" isIconOnly startContent={<ClipboardDocumentIcon className="size-5"/>}/>
-              <Input className="max-w-48" startContent={<MagnifyingGlassIcon className="size-5"/>} placeholder="Cari tiket deposit"/>
-              <Button variant="bordered" color="primary" isIconOnly startContent={<ArrowPathIcon className="size-5"/>}/>
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button variant="bordered" color="primary" isIconOnly startContent={<ArrowDownTrayIcon className="size-5"/>} />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Static Actions">
+                  <DropdownItem key="excel" onPress={onHandleDownloadExcel}>Download Excel</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+              <Button onPress={onHandleCopyClipboard}  variant="bordered" color="default" isIconOnly startContent={<ClipboardDocumentIcon className="size-5"/>}/>
+              <Input  onChange={onHandleSearch} className="max-w-48" startContent={<MagnifyingGlassIcon className="size-5"/>} placeholder="Cari tiket deposit"/>
+              <Button onPress={onHandleReload} variant="bordered" color="primary" isIconOnly startContent={<ArrowPathIcon className="size-5"/>}/>
             </div>
           </div>
           <Table
@@ -71,20 +204,24 @@ const MutasiSaldo = () => {
             className="h-[calc(100vh-20rem)] z-0"
             classNames={{ base: ["overflow-y-scroll overflow-x-hidden"], th: ["bg-primary text-white"] }}
             bottomContent={
-              <div className="flex justify-between items-center">
-                <Select placeholder="10" className="w-24" variant="bordered">
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
+              <div className="flex justify-between items-center sticky bottom-0 bg-white p-2">
+                <Select className="w-24" variant="bordered" selectedKeys={[perPage]} onSelectionChange={onHanleSelectPerPage}>
+                  <SelectItem key="20">20</SelectItem>
+                  <SelectItem key="50">50</SelectItem>
+                  <SelectItem key="100">100</SelectItem>
+                  <SelectItem key="250">250</SelectItem>
+                  <SelectItem key="500">500</SelectItem>
+                  <SelectItem key="1000">1000</SelectItem>
                 </Select>
                 <Pagination
                   isCompact
                   showControls
                   showShadow
                   color="primary"
-                  page={1}
-                  total={1}
+                  page={page}
+                  initialPage={1}
+                  total={totalPage}
+                  onChange={setPage}
                 />
               </div>
             }
@@ -92,20 +229,11 @@ const MutasiSaldo = () => {
             <TableHeader columns={mutasiColumns}>
               {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody items={mutasiRows}>
+            <TableBody emptyContent={<div className="h-[calc(100vh-28rem)] flex items-center justify-center">No rows to display.</div>} items={dataMutasi?.data || []}>
               {(item) => (
-                <TableRow key={item.key}>
+                <TableRow key={item.id_trx}>
                   {(columnKey) => (
-                    <TableCell>
-                      {columnKey === "aksi" ? (
-                        <div>
-                          <Button color="default" size="sm" variant="light" isIconOnly startContent={<PencilSquareIcon  className="size-5"/>} />
-                          <Button color="danger" size="sm" variant="light" isIconOnly startContent={<TrashIcon  className="size-5"/>} />
-                        </div>
-                      ) : (
-                        getKeyValue(item, columnKey)
-                      )}
-                    </TableCell>
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
                   )}
                 </TableRow>
               )}

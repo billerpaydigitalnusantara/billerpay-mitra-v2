@@ -2,92 +2,280 @@
 
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { Button, Card, CardBody, CardHeader, DateRangePicker, Divider, getKeyValue, Input, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@heroui/react";
-import { ClipboardDocumentIcon, MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
-import { today } from "@internationalized/date";
+import { Button, Card, CardBody, CardHeader, DateRangePicker, Divider, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@heroui/react";
+import { ClipboardDocumentIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { CalendarDate, today, parseDate } from "@internationalized/date";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { DataReportTrxFeeResponse, DataTrxFeeResponse } from "@/types";
+import jsonToClipboard from "@/utils/json-to-cllipboard";
+import api from "@/lib/axios";
+import { formatThousands } from "@/utils/formatter";
+import Link from "next/link";
 ChartJS.register(CategoryScale, LineElement, LinearScale, PointElement, Title, Tooltip, Legend, Filler);
 
 const transaksiColumns = [
   { key: "tanggal", label: "Tanggal" },
-  { key: "trx", label: "Trx" },
-  { key: "lembar", label: "Lembar" },
-  { key: "nominal", label: "Nominal" },
-  { key: "admin", label: "Admin" },
+  { key: "total_transaksi", label: "Trx" },
+  { key: "total_lembar", label: "Lembar" },
+  { key: "total_nominal", label: "Nominal" },
+  { key: "total_admin", label: "Admin" },
   { key: "profit", label: "Profit" }
 ]
 
-const transaksiRows = [
-  { key: "1", tanggal: "2021-10-10", trx: "1", lembar: "1", nominal: "Rp. 200.000", admin: "Rp. 2.000", profit: "Rp. 202.000"},
-  { key: "2", tanggal: "2021-10-10", trx: "1", lembar: "1", nominal: "Rp. 200.000", admin: "Rp. 2.000", profit: "Rp. 202.000"},
-  { key: "3", tanggal: "2021-10-11", trx: "2", lembar: "2", nominal: "Rp. 300.000", admin: "Rp. 3.000", profit: "Rp. 303.000"},
-  { key: "4", tanggal: "2021-10-12", trx: "3", lembar: "3", nominal: "Rp. 400.000", admin: "Rp. 4.000", profit: "Rp. 404.000"},
-  { key: "5", tanggal: "2021-10-13", trx: "4", lembar: "4", nominal: "Rp. 500.000", admin: "Rp. 5.000", profit: "Rp. 505.000"},
-  { key: "6", tanggal: "2021-10-14", trx: "5", lembar: "5", nominal: "Rp. 600.000", admin: "Rp. 6.000", profit: "Rp. 606.000"},
-  { key: "7", tanggal: "2021-10-15", trx: "6", lembar: "6", nominal: "Rp. 700.000", admin: "Rp. 7.000", profit: "Rp. 707.000"},
-  { key: "8", tanggal: "2021-10-16", trx: "7", lembar: "7", nominal: "Rp. 800.000", admin: "Rp. 8.000", profit: "Rp. 808.000"},
-  { key: "9", tanggal: "2021-10-17", trx: "8", lembar: "8", nominal: "Rp. 900.000", admin: "Rp. 9.000", profit: "Rp. 909.000"},
-  { key: "10", tanggal: "2021-10-18", trx: "9", lembar: "9", nominal: "Rp. 1.000.000", admin: "Rp. 10.000", profit: "Rp. 1.010.000"},
-  { key: "11", tanggal: "2021-10-19", trx: "10", lembar: "10", nominal: "Rp. 1.100.000", admin: "Rp. 11.000", profit: "Rp. 1.111.000"},
-  { key: "12", tanggal: "2021-10-20", trx: "11", lembar: "11", nominal: "Rp. 1.200.000", admin: "Rp. 12.000", profit: "Rp. 1.212.000"},
-  { key: "13", tanggal: "2021-10-21", trx: "12", lembar: "12", nominal: "Rp. 1.300.000", admin: "Rp. 13.000", profit: "Rp. 1.313.000"},
-  { key: "14", tanggal: "2021-10-22", trx: "13", lembar: "13", nominal: "Rp. 1.400.000", admin: "Rp. 14.000", profit: "Rp. 1.414.000"},
-  { key: "15", tanggal: "2021-10-23", trx: "14", lembar: "14", nominal: "Rp. 1.500.000", admin: "Rp. 15.000", profit: "Rp. 1.515.000"},
-  { key: "16", tanggal: "2021-10-24", trx: "15", lembar: "15", nominal: "Rp. 1.600.000", admin: "Rp. 16.000", profit: "Rp. 1.616.000"},
-  { key: "17", tanggal: "2021-10-25", trx: "16", lembar: "16", nominal: "Rp. 1.700.000", admin: "Rp. 17.000", profit: "Rp. 1.717.000"},
-  { key: "18", tanggal: "2021-10-26", trx: "17", lembar: "17", nominal: "Rp. 1.800.000", admin: "Rp. 18.000", profit: "Rp. 1.818.000"},
-  { key: "19", tanggal: "2021-10-27", trx: "18", lembar: "18", nominal: "Rp. 1.900.000", admin: "Rp. 19.000", profit: "Rp. 1.919.000"},
-  { key: "20", tanggal: "2021-10-28", trx: "19", lembar: "19", nominal: "Rp. 2.000.000", admin: "Rp. 20.000", profit: "Rp. 2.020.000"},
-  { key: "21", tanggal: "2021-10-29", trx: "20", lembar: "20", nominal: "Rp. 2.100.000", admin: "Rp. 21.000", profit: "Rp. 2.121.000"},
-  { key: "22", tanggal: "2021-10-30", trx: "21", lembar: "21", nominal: "Rp. 2.200.000", admin: "Rp. 22.000", profit: "Rp. 2.222.000"}
-]
+interface Filters {
+  end_date: string,
+  end_time: string,
+  start_date: string,
+  start_time: string,
+  tab?: string
+}
 
-const labels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
-
-// Data want to show on chart
-const datasets = [12, 45, 67, 43, 89, 34, 67, 43, 89, 34, 67, 43, 89, 34, 67, 43];
-
-const data = {
-  labels: labels,
-  datasets: [
-    {
-      // Title of Graph
-      label: "Transaksi",
-      data: datasets,
-      borderColor: "rgb(53, 162, 235)",
-      backgroundColor: "rgba(53, 162, 235, 0.3)",
-      fill: false,
-      tension: 0,
-    },
-    // insert similar in dataset object for making multi line chart
-  ],
-};
-
-// To make configuration
-const options = {
-  scales: {
-    y: {
-      title: {
-        display: true,
-        text: "Jumlah Transaksi",
-      },
-      display: true,
-      min: 10,
-    },
-    x: {
-      title: {
-        display: true,
-        text: "Tanggal Transaksi",
-      },
-      display: true,
-    },
-  },
-};
+interface DataChart {
+  labels: string[], 
+  datasets: {
+    label: string,
+    data: number[],
+    borderColor: string,
+    backgroundColor: string,
+    fill?: boolean,
+    tension?: number,
+    borderDash?: number[]
+  }[]
+}
 
 const TransaksiFee = () => {
-  const [selected, setSelected] = useState("list");
+  const [selectedTab, setSelectedTab] = useState("transaksi");
+  const [startDate, setStartDate] = useState<CalendarDate>(new CalendarDate(today('Asia/Jakarta').year, today('Asia/Jakarta').month, 1))
+  const [endDate, setEndDate] = useState<CalendarDate>(today('Asia/Jakarta'))
+  const [dataTrxFee, setDataTrxFee] = useState<DataTrxFeeResponse[]>([] as DataTrxFeeResponse[])
+  const [dataReportTrxFee, setDataReportTrxFee] = useState<DataReportTrxFeeResponse>({} as DataReportTrxFeeResponse)
+  const [dataChartTrx, setDataChartTrx] = useState<DataChart>({
+    labels: [],
+    datasets: [
+      {
+        label: "Transaksi",
+        data: [],
+        borderColor: "rgb(53, 162, 235)",
+        backgroundColor: "rgba(53, 162, 235, 0.3)",
+        fill: true,
+        tension: 0.3,
+      }
+    ],
+  })
+  
+  const [optionChart, setOptionChart] = useState({})
+
+  const fetchDataFee = async () => {
+    const filters: Filters = {
+      end_date: endDate.toString(),
+      end_time: "23:59:00",
+      start_date: startDate.toString(),
+      start_time: "00:00:00",
+    }
+
+    const response = await api.post('/REQUEST/act/REPORT/web_transaksi_bulan/WEB', { filters })
+    const data: DataTrxFeeResponse[] = response.data.data
+    const report: DataReportTrxFeeResponse = response.data.report
+    const dataTrxFee: DataTrxFeeResponse[] = [ ...data, {
+      tanggal: "Total",
+      total_transaksi: report.total_trx,
+      total_lembar: report.total_lembar,
+      total_tagihan: report.total_tagihan,
+      total_nominal: report.total_nominal,
+      total_admin: report.total_admin,
+      profit: report.total_profit,
+      stat: 0,
+      abnormal: "",
+    }]
+    setDataTrxFee(dataTrxFee)
+    setDataReportTrxFee(report)
+  }
+
+  const fetchDataChart = async () => {
+    const filters: Filters = {
+      end_date: endDate.toString(),
+      end_time: "23:59:00",
+      start_date: startDate.toString(),
+      start_time: "00:00:00",
+      tab: selectedTab
+    }
+
+    const response = await api.post('/REQUEST/act/DASHBOARD/transaksi_month/WEB', { filters })
+    const data = response.data.data
+    if(data.data) {
+      if(selectedTab === 'transaksi'){
+        const labels = Object.keys(data.data)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dataLembar = Object.values(data.data).map((entry: any) => entry.lembar)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dataNominal = Object.values(data.data).map((entry: any) => entry.nominal);
+        const chartData = {
+          labels: labels,
+          datasets: [
+            {
+              label: "Transaksi",
+              data: dataLembar,
+              borderColor: "rgb(53, 162, 235)",
+              backgroundColor: "rgba(53, 162, 235, 0.3)",
+              fill: true,
+              tension: 0.3,
+            }
+          ],
+        }
+  
+        const options = {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                label: (context: any) => {
+                  const index = context.dataIndex;
+                  return `Lembar: ${dataLembar[index]}, Nominal: Rp ${formatThousands(dataNominal[index])}`;
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: "Jumlah Transaksi",
+              },
+              display: true,
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Tanggal Transaksi",
+              },
+              display: true,
+            },
+          },
+        };
+        
+        setOptionChart(options)
+        setDataChartTrx(chartData)
+      } else {
+        const labels = Object.keys(data.data);
+        const products = [...new Set(Object.values(data.data).flatMap((value) => Object.keys(value as object)))];
+        const dataLembar = products.map((product, index) => product !== 'nominal' && product !== 'lembar' ? ({
+          label: `${product}`,
+          data: labels.map(date => data.data[date][product]?.lembar || 0),
+          borderColor: `hsl(${index * 86}, 70%, 50%)`,
+          backgroundColor: `hsl(${index * 86}, 70%, 50%)`,
+          tension: 0.3
+         }) : null).filter(dataset => dataset !== null) as DataChart['datasets'];
+
+        const chartData = {
+          labels: labels,
+          datasets: dataLembar
+        };
+
+        const options = {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                label: (context: any) => {
+                  return `${context.dataset.label}: ${context.raw}`;
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: "Jumlah Transaksi",
+              },
+              display: true,
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Tanggal Transaksi",
+              },
+              display: true,
+            },
+          },
+        };
+
+        setOptionChart(options)
+        setDataChartTrx(chartData)
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchDataFee()
+    fetchDataChart()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    fetchDataChart()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab])
+
+  const onHandleApplyFilter = () => {
+    fetchDataFee()
+    fetchDataChart()
+  }
+
+  const onHandleReload = () => {
+    fetchDataFee()
+    fetchDataChart()
+  }
+
+  const onHandleCopyClipboard = () => {
+    jsonToClipboard(dataTrxFee)
+  }
+
+  const isWeekend = (date: string) => {
+    const dayOfWeek = parseDate(date).toDate('Asia/Jakarta').getUTCDay();
+    return dayOfWeek === 5 || dayOfWeek === 6;
+  }
+
+  const renderCell = useCallback((trx: DataTrxFeeResponse, columnKey: React.Key) => {
+    const cellValue = trx[columnKey as keyof DataTrxFeeResponse];
+
+    if(cellValue === 'Total') {
+      return cellValue
+    }
+
+    switch (columnKey) {
+      case "tanggal":
+        return (
+          <Link href={`/laporan/transaksi-fee/` + cellValue} className={`underline ${isWeekend(cellValue.toString()) ? 'text-red-700' : 'text-blue-700'}`}>{cellValue}</Link>
+        )
+      case "total_nominal":
+        return (
+          <div className='text-right'>
+            Rp {formatThousands(cellValue)}
+          </div>
+        )
+      case "total_admin":
+          return (
+            <div className='text-right'>
+              Rp {formatThousands(cellValue)}
+            </div>
+          )
+      case "profit":
+          return (
+            <div className='text-right'>
+              Rp {formatThousands(cellValue)}
+            </div>
+          )
+      default:
+        return cellValue
+    }
+  }, [])
    
   return (
     <div className="bg-gray-100 w-full min-h-screen grid grid-cols-2 grid-rows-[1fr, 2fr, 1fr] gap-4">
@@ -101,16 +289,21 @@ const TransaksiFee = () => {
               <DateRangePicker 
                 className="max-w-60"
                 defaultValue={{
-                  start: today('Asia/Jakarta').subtract({ days: 14 }),
-                  end: today('Asia/Jakarta'),
+                  start: startDate,
+                  end: endDate,
+                }} 
+                onChange={(value) => {
+                  if(value) {
+                    setStartDate(value?.start)
+                    setEndDate(value?.end)
+                  }
                 }} 
               />
-              <Button color="primary">Terapkan</Button>
+              <Button color="primary" onPress={onHandleApplyFilter}>Terapkan</Button>
             </div>
             <div className="flex gap-2">
-              <Button variant="bordered" color="default" isIconOnly startContent={<ClipboardDocumentIcon className="size-5"/>}/>
-              <Input className="max-w-48" startContent={<MagnifyingGlassIcon className="size-5"/>} placeholder="Cari tiket deposit"/>
-              <Button variant="bordered" color="primary" isIconOnly startContent={<ArrowPathIcon className="size-5"/>}/>
+              <Button onPress={onHandleCopyClipboard} variant="bordered" color="default" isIconOnly startContent={<ClipboardDocumentIcon className="size-5"/>}/>
+              <Button onPress={onHandleReload} variant="bordered" color="primary" isIconOnly startContent={<ArrowPathIcon className="size-5"/>}/>
             </div>
           </div>
           <Table
@@ -118,24 +311,16 @@ const TransaksiFee = () => {
              isHeaderSticky
              removeWrapper
              className="h-[calc(100vh-20rem)] z-0"
-             classNames={{ base: ["overflow-y-scroll overflow-x-hidden"], th: ["bg-primary text-white"] }}
+             classNames={{ base: ["overflow-y-scroll overflow-x-hidden"], th: ["bg-primary text-white"], tbody: ["[&>tr]:first:rounded-lg"], tr: ["last:bg-primary-50 [&>td]:last:font-semibold [&>td]:last:text-gray-700"], td: ["first:rounded-s-lg last:rounded-e-lg"]}}
           >
             <TableHeader columns={transaksiColumns}>
               {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody items={transaksiRows}>
-              {(item) => (
-                <TableRow key={item.key}>
+            <TableBody emptyContent={<div className="h-[calc(100vh-28rem)] flex items-center justify-center">No rows to display.</div>} items={dataTrxFee}>
+              {(item: DataTrxFeeResponse) => (
+                <TableRow key={item.tanggal}>
                   {(columnKey) => (
-                    <TableCell>
-                      {columnKey === "tanggal" ? (
-                        <span>
-                          <a href={`/laporan/transaksi-fee/` + item.tanggal} className="text-blue-700 underline">{getKeyValue(item, columnKey)}</a>
-                        </span>
-                      ) : (
-                        getKeyValue(item, columnKey)
-                      )}
-                    </TableCell>
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
                   )}
                 </TableRow>
               )}
@@ -150,7 +335,7 @@ const TransaksiFee = () => {
               <span className="text-sm uppercase font-bold">Total Lembar</span>
             </CardHeader>
             <CardBody className="overflow-visible flex items-end py-2">
-              <h4 className="font-bold text-xl">0</h4>              
+              <h4 className="font-bold text-xl">{dataReportTrxFee.total_lembar}</h4>              
             </CardBody>
           </Card>
           <Card className="p-4 bg-danger text-white">
@@ -158,7 +343,7 @@ const TransaksiFee = () => {
               <span className="text-sm uppercase font-bold">Total Nominal</span>
             </CardHeader>
             <CardBody className="overflow-visible flex items-end py-2">
-              <h4 className="font-bold text-large">Rp. 200.000</h4>              
+              <h4 className="font-bold text-large">Rp. {formatThousands(dataReportTrxFee.total_nominal || 0)}</h4>              
             </CardBody>
           </Card>
           <Card className="p-4 bg-blue-500 text-white">
@@ -166,7 +351,7 @@ const TransaksiFee = () => {
               <span className="text-sm uppercase font-bold">Total Profit</span>
             </CardHeader>
             <CardBody className="overflow-visible flex items-end py-2">
-              <h4 className="font-bold text-xl">Rp. 20.000</h4>              
+              <h4 className="font-bold text-xl">Rp. {formatThousands(dataReportTrxFee.total_profit || 0)}</h4>              
             </CardBody>
           </Card>
         </div>
@@ -175,22 +360,22 @@ const TransaksiFee = () => {
           aria-label="options-layout" 
           color="primary" 
           variant="solid"
-          selectedKey={selected}
-          onSelectionChange={(key) => setSelected(key.toString())}
+          selectedKey={selectedTab}
+          onSelectionChange={(key) => setSelectedTab(key as string)}
         >
           <Tab 
-            value="transaksi" 
+            key="transaksi" 
             title="Transaksi"
             className="w-full"
           >
-            <Line data={data} options={options} />
+            <Line data={dataChartTrx} options={optionChart} />
           </Tab>
           <Tab 
-            value="produk" 
+            key="product" 
             title="Produk"
             className="w-full"
           >
-            <Line data={data} options={options} />
+            <Line data={dataChartTrx} options={optionChart} />
           </Tab>
         </Tabs>
       </div>

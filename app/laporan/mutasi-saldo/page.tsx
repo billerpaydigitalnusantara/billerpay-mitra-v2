@@ -35,7 +35,6 @@ const MutasiSaldo = () => {
   const [perPage, setPerPage] = useState<string>("20")
   const [totalPage, setTotalPage] = useState<number>(1)
   const [search, setSearch] = useState<string>("")
-  // const [status, setStatus] = useState<string>("ALL")
   const [dataMutasi, setDataMutasi] = useState<DataMutasiResponse>({} as DataMutasiResponse)
 
   const fetchDataMutasi = async () => {

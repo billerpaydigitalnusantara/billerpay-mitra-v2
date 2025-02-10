@@ -153,3 +153,54 @@ export interface DataMutasi {
   saldo: string
   status: string
 }
+
+export interface DataTrxFeeDayResponse {
+  product: string
+  stat: number
+  abnormal: string
+  total_transaksi: number
+  total_lembar: number
+  total_nominal: number
+  total_tagihan: number
+  total_admin: number
+  profit: number
+}
+
+export interface DataTrxFeeDayDetailResponse {
+  no: string
+  noid: string
+  nama_member: string
+  alias: string
+  id_trx: string
+  time: string
+  idpel: string
+  nama: string
+  reff: string
+  lembar: string
+  tagihan: string
+  admin: string
+  nominal_transaksi: string
+  fee_m3: string
+  profit: string
+}
+
+export interface DataTrxFeeResponse {
+  tanggal: string
+  stat: number
+  abnormal: string
+  total_transaksi: number
+  total_lembar: number
+  total_nominal: number
+  total_tagihan: number
+  total_admin: number
+  profit: number
+}
+
+export interface DataReportTrxFeeResponse {
+  total_trx: number
+  total_lembar: number
+  total_nominal: number
+  total_tagihan: number
+  total_profit: number
+  total_admin: number
+}

@@ -204,3 +204,32 @@ export interface DataReportTrxFeeResponse {
   total_profit: number
   total_admin: number
 }
+
+export interface DataMasterKolektifResponse {
+  page: number
+  totalData: string
+  data: DataMasterKolektif[]
+}
+
+export interface DataMasterKolektif {
+  no: string
+  id_goup: string
+  jenis: string
+  nama_group: string
+  alamat: string
+  jml_idpel: string
+}
+
+export interface DataMasterDetailKolektifResponse {
+  page: number
+  totalData: string
+  data: DataMasterDetailKolektif[]
+}
+
+export interface DataMasterDetailKolektif {
+  id: string
+  idpel: string
+  idpel_name: string
+  tarif_daya: string
+  tagihan: string
+}

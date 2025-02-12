@@ -21,15 +21,24 @@ api.interceptors.request.use(
       const username = Cookies.get('username')
 
       if (token && noid && appid && username) {
-        if (config.method === 'post' || config.method === 'put' || config.method === 'patch') {
+        const isMultipart = typeof config.headers?.['Content-Type'] === 'string' && config.headers['Content-Type'].includes('multipart/form-data')
+        if (!isMultipart && config.method && ['post', 'put', 'patch'].includes(config.method)) {
           config.data = {
             ...config.data,
             noid,
             appid,
             username,
             token,
-            versi: 'V2'
-          };
+          }
+
+          if (config.data?.versi !== 'V1') {
+            config.data = {
+              ...config.data,
+              versi: 'V2'
+            }
+          } else {
+            delete config.data.versi
+          }
         }
       }
     }

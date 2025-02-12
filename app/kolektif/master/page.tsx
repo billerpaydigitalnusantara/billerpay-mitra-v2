@@ -52,6 +52,8 @@ const customerColumns = [
   { key: "aksi", label: "Aksi" }
 ]
 
+export type Selection = 'all' | Set<Key>
+
 const MasterKolektif = () => {
   const [dataMaster, setDataMaster] = useState<DataMasterKolektifResponse>({} as DataMasterKolektifResponse)
   const [pageMaster, setPageMaster] = useState<number>(1)
@@ -173,8 +175,8 @@ const MasterKolektif = () => {
     setSearchDetail(event.target.value)
   }, 500)
 
-  const onHandleSelectRowMaster = (key: Key) => {
-    const selectedRow = dataMaster.data.find((item) => item.no === key)
+  const onHandleSelectRowMaster = (keys: Selection) => {
+    const selectedRow = dataMaster.data.find((item) => item.no === Array.from(keys)[0])
     if(selectedRow) {
       setPageDetail(1)
       setSelectedGroup(selectedRow)
@@ -412,10 +414,11 @@ const MasterKolektif = () => {
             removeWrapper
             className="h-[calc(100vh-20rem)] z-0"
             classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
-            onSelectionChange={(keys) => onHandleSelectRowMaster(Array.from(keys)[0])}
+            onSelectionChange={onHandleSelectRowMaster}
             selectionMode="single"
             selectionBehavior="replace"
-            selectedKeys={selectedGroup.no}
+            color="primary"
+            selectedKeys={[selectedGroup.no]}
             bottomContent={
               <div className="flex justify-between items-center sticky bottom-0 bg-white p-2">
                 <Select placeholder="10" className="w-24" variant="bordered" selectedKeys={[perPageMaster]} onSelectionChange={onHanleSelectPerPageMaster}>

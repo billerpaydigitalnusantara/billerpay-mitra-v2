@@ -233,3 +233,51 @@ export interface DataMasterDetailKolektif {
   tarif_daya: string
   tagihan: string
 }
+
+export interface DataReprintKolektifResponse {
+  page: number
+  totalData: string
+  data: DataReprintKolektif[]
+}
+
+export interface DataReprintKolektif {
+  no: string
+  id_goup: string
+  jenis: string
+  nama_group: string
+  alamat: string
+  jml_idpel: string
+  last_pay: string
+}
+
+export interface DataReprintDetailKolektif {
+  reff: string
+  idpel: string
+  idpel_name: string
+  tagihan: string
+  admin_bank: string
+  total_tagihan: string
+}
+
+export interface DataProsesKolektifResponse {
+  page: number
+  totalData: string
+  data: DataProsesKolektif[]
+}
+
+export interface DataProsesKolektif {
+  no: string
+  id_goup: string
+  jenis: string
+  nama_group: string
+  alamat: string
+  jml_idpel: string
+  status: string
+  last_transaksi: string
+}
+
+
+export interface ListAdminResponse {
+  id: string
+  admin: string
+}

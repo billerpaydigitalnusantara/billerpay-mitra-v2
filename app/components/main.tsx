@@ -68,7 +68,7 @@ const Main = () => {
         selectedKeys={selectedKeys}
         selectionMode="multiple"
         onSelectionChange={(keys) => setSelectedKeys(keys as Set<string>)}
-        color="default"
+        color="primary"
       >
         <TableHeader columns={columns}>
           {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

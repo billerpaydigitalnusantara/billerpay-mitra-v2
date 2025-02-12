@@ -30,7 +30,7 @@ const ProsesData = () => {
           className="z-0"
           classNames={{ base: ["overflow-y-scroll overflow-x-hidden box-content"], th: ["bg-primary text-white"] }}
           selectionMode="multiple"
-          color="default"
+          color="primary"
         >
           <TableHeader columns={dataColumns}>
             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

@@ -276,8 +276,59 @@ export interface DataProsesKolektif {
   last_transaksi: string
 }
 
-
 export interface ListAdminResponse {
   id: string
   admin: string
+}
+
+export interface AppInfoResponse {
+  versi: string
+  transaksi: string
+  kolektif: string
+  laporan: string
+  excel: string
+}
+
+export interface TransferMemberResponse {
+  page: number
+  recordsTotal: string
+  data: TransferMember[]
+}
+
+export interface TransferMember {
+  id_trx: string
+  time: string
+  product: string
+  idpel: string
+  nohp: string
+  nama: string
+  reff: string
+  status: string
+  nominal: string
+}
+
+export interface RequestTicketDeposit {
+  nominal_deposit: number
+  bank_deposit: string
+  norek_deposit: string
+  namerek_deposit: string
+  expired_deposit: string
+}
+
+export interface DataTicketDepositResponse {
+  page: number
+  totalData: string
+  data: DataTicketDeposit[]
+}
+
+export interface DataTicketDeposit {
+  id: string
+  noid: string
+  time: string
+  nama: string
+  alias: string
+  bank: string
+  nominal: string
+  norek_tujuan: string
+  status: string
 }

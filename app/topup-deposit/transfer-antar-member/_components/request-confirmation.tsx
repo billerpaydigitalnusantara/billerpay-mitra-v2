@@ -12,26 +12,47 @@ import {
 import { formatToCurrency } from "@/utils/formatter"
 
 interface RequestConfirmationProps {
-  isOpen: boolean;
-  onOpenChange: () => void;
-  nominal: string;
-  receiver: string;
+  isOpen: boolean
+  onOpenChange: () => void
+  nominal: string
+  receiver: string
+  nama: string
+  onProcess: () => void
 }
 
-const RequestConfirmation: React.FC<RequestConfirmationProps> = ({ isOpen, onOpenChange, nominal, receiver }) => { 
+const RequestConfirmation: React.FC<RequestConfirmationProps> = ({ isOpen, onOpenChange, nominal, receiver, nama, onProcess }) => {
   return (
     <>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
         <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>Konfirmasi Request</ModalHeader>
+            <ModalHeader>Proses Transfer</ModalHeader>
             <ModalBody>
-              <span>Anda yakin ingin melakukan Transfer Antar Member sebesar {formatToCurrency(nominal)} kepada {receiver}</span>
+              <div className="flex flex-col gap-4">
+                <span>Periksa Kembali Detail Tujuan Transfer</span>
+                <div className="font-medium text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <span className="w-36">Tujuan Transfer</span>
+                    <span> : </span>
+                    <span>{receiver}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-36">Nama Pengguna</span>
+                    <span> : </span>
+                    <span>{nama}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-36">Nominal</span>
+                    <span> : </span>
+                    <span>{formatToCurrency(nominal)}</span>
+                  </div>
+                </div>
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button color="default" onPress={onClose} startContent={<XMarkIcon className="size-5"/>}>Batal</Button>
-              <Button color="primary" onPress={onClose} startContent={<CheckIcon className="size-5" />}>Proses</Button>
+              <Button color="primary" onPress={onProcess} startContent={<CheckIcon className="size-5" />}>Proses</Button>
             </ModalFooter>
           </>
         )}

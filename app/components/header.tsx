@@ -12,34 +12,53 @@ import { usePathname, useRouter } from "next/navigation";
 import Cookies from 'js-cookie'
 import api from "@/lib/axios";
 import { NotificationResponse } from "@/types";
+import { formatThousands } from "@/utils/formatter";
 
 const Header = () => {
-  const {isOpen: isOpenPassword, onOpen: onOpenPassword, onOpenChange: onOpenChangePassword} = useDisclosure();
+  const {isOpen: isOpenPassword, onOpen: onOpenPassword, onOpenChange: onOpenChangePassword, onClose: onClosePassword} = useDisclosure();
   const {isOpen: isOpenApp, onOpen: onOpenApp, onOpenChange: onOpenChangeApp} = useDisclosure();
   const [notifMessage, setNotifMessage] = useState<NotificationResponse>({} as NotificationResponse)
+  const [totalMessage, setTotalMessage] = useState<string>("0")
+  const [saldo, setSaldo] = useState<string>("0")
+  const [name, setName] = useState<string>("")
   const pathname = usePathname()
   const router = useRouter()
 
-  useEffect(() => {
-    async function fetch() {
-      const pages = {
-        page: 1,
-        perPage: 10
-      }
-      const response = await api.post('/REQUEST/act/REPORT_PAGING/rpaging_log_notification/WEB', { pages })
-      setNotifMessage(response.data)
+  const fetchHeader = async () => {
+    const pages = {
+      page: 1,
+      perPage: 10
     }
 
-    fetch()
+    const notifResponse = await api.post('/REQUEST/act/REPORT_PAGING/rpaging_log_notification/WEB', { pages })
+    const saldoResponse = await api.post('/REQUEST/act/PROCESS/menu_cek_saldo/WEB', { versi: 'V1' })
+    const totalMsgResponse = await api.post('/REQUEST/act/PROCESS/service_cek_new_message/WEB', { pages })
+    setNotifMessage(notifResponse.data)
+    setSaldo(saldoResponse.data.saldo)
+    setTotalMessage(totalMsgResponse.data.totalPesan)
+  }
+
+  const fetchReadMessage = async () => {
+    await api.post('REQUEST/act/PROCESS/menu_tandai_message_dibaca/WEB')
+    fetchHeader()
+  }
+
+  useEffect(() => {
+    setName(Cookies.get('nama') || "")
+    fetchHeader()
   }, [])
 
-  const handleClick = async () => {
-    const response = await fetch('https://api.billerpay.id/sertifikat/index.php?noid=123456');
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+  
+
+  const onHandleDownloadCert = async () => {
+    const noid = Cookies.get('noid')
+    const response = await api.post('https://api.billerpay.id/sertifikat/index.php?noid='+noid, {}, {
+      responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'sertifikat.png';
+    link.download = `SERTIFIKAT ${name}`;
     link.click();
     window.URL.revokeObjectURL(url);
   };
@@ -49,6 +68,7 @@ const Header = () => {
     Cookies.remove('appid')
     Cookies.remove('noid')
     Cookies.remove('username')
+    Cookies.remove('nama')
     router.push('/login')
   }
 
@@ -116,14 +136,14 @@ const Header = () => {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-4">
           <div className="font-semibold text-primary">
-            Rp. 58.984
+            Rp. { formatThousands(saldo) }
           </div>
           <WalletIcon className="size-6 text-primary" />
         </div>
         <Popover placement="bottom" showArrow={true}>
           <PopoverTrigger>
             <div className="flex items-center cursor-pointer">
-              <Badge color="danger" content="99" shape="circle" size="sm">
+              <Badge color="danger" content={totalMessage} shape="circle" size="md">
                   <BellIcon className="size-6 text-gray-600" />
               </Badge>
             </div>
@@ -134,10 +154,10 @@ const Header = () => {
                 Pemberitahuan
               </div>
               <Divider/>
-              <div className="p-4 overflow-y-auto h-[270px]">
+              <div className="overflow-y-auto h-[270px]">
                 {
                   notifMessage.data?.map((notif, index) => (
-                    <div key={notif.id}>
+                    <div className={`p-4 pb-0 last:pb-2 ${notif.stat === '0' ? 'bg-primary-100': ''}`} key={notif.id}>
                       <div className="mb-4">
                         <div className="flex items-center justify-between mb-2 text-gray-600">
                           <div className="text-xs">{notif.time.split(' ')[0]}</div>
@@ -148,14 +168,14 @@ const Header = () => {
                           <div className="text-xs text-gray-700">{notif.message}</div>
                         </div>
                       </div>
-                      <Divider className={`my-4 ${notifMessage.data.length === (index+1) ? 'hidden' : ''}`}/>
+                      <Divider className={`${notifMessage.data.length === (index+1) ? 'hidden' : ''}`}/>
                     </div>
                   ))
                 }
               </div>
               <div className="flex items-center gap-2 p-4">
-                <Button size="sm">Tandai Semua Dibaca</Button>
-                <Button size="sm" color="primary">Lihat Selengkapnya</Button>
+                <Button size="sm" onPress={fetchReadMessage}>Tandai Semua Dibaca</Button>
+                <Button size="sm" color="primary" onPress={() => router.push('/notification')}>Lihat Selengkapnya</Button>
               </div>
             </div>
           </PopoverContent>
@@ -168,14 +188,14 @@ const Header = () => {
             <DropdownItem key="printer" startContent={<PrinterIcon className="size-5"/>} href="/printer">Printer</DropdownItem>
             <DropdownItem key="ubah-password" startContent={<ShieldCheckIcon className="size-5" />} onPress={onOpenPassword}>Ubah Password</DropdownItem>
             <DropdownItem key="informasi" startContent={<ComputerDesktopIcon className="size-5" />} onPress={onOpenApp}>Informasi Aplikasi</DropdownItem>
-            <DropdownItem key="sertifikat" startContent={<DocumentCheckIcon className="size-5" />} onPress={handleClick}>Download Sertifikat</DropdownItem>
+            <DropdownItem key="sertifikat" startContent={<DocumentCheckIcon className="size-5" />} onPress={onHandleDownloadCert}>Download Sertifikat</DropdownItem>
           </DropdownMenu>
         </Dropdown>
         <Dropdown>
           <DropdownTrigger>
             <div className="flex items-center gap-2 cursor-pointer">
-              <Avatar size="sm" src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-              <div className="font-semibold">HAMZAH NURSAUFA</div>
+              <Avatar size="sm" showFallback src="https://images.unsplash.com/broken" />
+              <div className="font-semibold">{ name }</div>
             </div>
           </DropdownTrigger>
           <DropdownMenu>
@@ -183,7 +203,7 @@ const Header = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-      <ChangePassword isOpen={isOpenPassword} onOpenChange={onOpenChangePassword} />
+      <ChangePassword isOpen={isOpenPassword} onOpenChange={onOpenChangePassword} onClose={onClosePassword} />
       <AppInfo isOpen={isOpenApp} onOpenChange={onOpenChangeApp} />
     </header>
   );

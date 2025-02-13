@@ -6,24 +6,28 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import api from "@/lib/axios";
-import { v4 as uuidv4 } from "uuid"
 import Cookies from "js-cookie"
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { getCurrentBrowserFingerPrint } from "@rajesh896/broprint.js";
 
 const LoginPage = () => {
   const router = useRouter()
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
   const [clientInfo, setClientInfo] = useState([])
+  const [uniqueID, setUniqueID] = useState<string>("")
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   useEffect(() => {
     async function fetch() {
       const res = await api.get('https://us1.api-bdc.net/data/client-info')
+      const uniqueID = await getCurrentBrowserFingerPrint()
       setClientInfo(res.data)
+      setUniqueID(uniqueID)
     }
     fetch()
   }, [])
+
 
   const onHandleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -32,7 +36,8 @@ const LoginPage = () => {
       tipe: 'LOGIN',
       username: (formElements.namedItem('username') as HTMLInputElement)?.value,
       password: (formElements.namedItem('password') as HTMLInputElement)?.value,
-      appid: uuidv4().replace(/-/g, ''),
+      appid: uniqueID,
+      token: '',
       website: 'transaksi',
       detail: clientInfo
     }
@@ -41,11 +46,12 @@ const LoginPage = () => {
       const response = await api.post('/LOGIN/LOGIN_V2/WEB', data)
 
       if(response.data.status === 'SUKSESLOGIN') {
-        const {token, appid, noid, username } = response.data
+        const {token, appid, noid, username, nama } = response.data
         Cookies.set('token', token)
         Cookies.set('noid', noid)
         Cookies.set('appid', appid)
         Cookies.set('username', username)
+        Cookies.set('nama', nama)
         router.push('/')
       }
 

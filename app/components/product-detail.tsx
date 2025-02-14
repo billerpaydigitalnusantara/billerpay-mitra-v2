@@ -15,7 +15,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import api from "@/lib/axios";
-import { debounce } from "lodash";
+import { debounce, isEmpty } from "lodash";
 import { formatThousands } from "@/utils/formatter";
 
 
@@ -27,6 +27,7 @@ interface ProductDetailProps {
 
 export interface DataResponse {
   id: string
+  type: string
   default?: Default
   list: List[]
 }
@@ -52,88 +53,114 @@ export interface DataPayload {
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, product }) => {
   const [selectedProductDetail, setSelectedProductDetail] = useState<ListProductDetail>({} as ListProductDetail)
-  const [dataApiResponse, setDataApiResponse] = useState<Array<DataResponse>>([])
+  const [dataApiResponse, setDataApiResponse] = useState<DataResponse[]>([] as DataResponse[])
   const [selectedPackage, setSelectedPackage] = useState<List>({} as List)
-  const [dataPayload, setDataPayload] = useState<Array<DataPayload>>([])
+  const [dataPayload, setDataPayload] = useState<DataPayload[]>([] as DataPayload[])
+
+  const fetchProductLayout = async () => {
+    const response = product.config?.layout.filter((layout) => layout.value?.endpoint).map(async (layout) => {
+      if(layout.value?.endpoint) {
+        const url = layout.value.endpoint.replace('{{interface}}', 'WEB')
+        const res = await api.post(url)
+        const id = layout.id
+        const type = layout.tipe
+        return {...res.data, id, type}
+      }
+    })
+    const responses: Array<DataResponse> = await Promise.all(response || [])
+    setDataApiResponse(responses)
+  }
+
+  const fetchProductDetailLayout = async () => {
+    const response = selectedProductDetail.config?.layout.filter((layout) => layout.value?.endpoint).map(async (layout) => {
+      if(layout.value?.endpoint) {
+        const url = layout.value.endpoint.replace('{{interface}}', 'WEB')
+        const res = await api.post(url)
+        const id = layout.id
+        const type = layout.tipe
+        return {...res.data, id, type}
+      }
+    })
+    const responses: Array<DataResponse> = await Promise.all(response || [])
+    setDataApiResponse(responses)
+
+    if(!isEmpty(responses.find(item => item.type === 'card' || item.type === 'list'))){
+      setSelectedPackage(responses[0]?.list[0])
+    }
+
+    const defaultValue = responses.map((item) => {
+      return {
+        id: item.id,
+        value: item.default?.value || responses[0]?.list[0].value
+      }
+    })
+
+    setDataPayload(upsertData(dataPayload, defaultValue))
+  }
+
+  const fetchEventLayout = async () => {
+    const response = product.config?.layout.filter((layout) => layout.event?.endpoint).map(async (layout) => {
+      const payload = dataPayload.find((payload) => payload.id === layout.id)
+      if(layout.event?.endpoint && payload?.value) {
+        const url = layout.event.endpoint.replace(`{{${payload?.id}}}`, String(payload?.value))
+        const id = layout.event.set_value
+        const type = layout.tipe
+        const res = await api.post(url)
+        return {...res.data, id, type}
+      }
+
+      return {
+        id: layout.event?.set_value,
+        type: layout.tipe,
+        list: []
+      }
+    })
+
+    const responses: Array<DataResponse> = await Promise.all(response || [])
+    setDataApiResponse(upsertData(dataApiResponse, responses))
+  }
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = product.config?.layout.filter((layout) => layout.value?.endpoint).map(async (layoutItem) => {
-        if(layoutItem.value?.endpoint) {
-          const url = layoutItem.value.endpoint.replace('{{interface}}', 'WEB')
-          const res = await api.get(url)
-          const id = layoutItem.id
-          return {...res.data, id}
-        }
-      })
-      const responses: Array<DataResponse> = await Promise.all(response || [])
-      setDataApiResponse(responses)
-    }
-
     if(product.isActive === '1' && product.map_product_detail === 'no') {
-      fetchData()
+      fetchProductLayout()
     }
 
-    if(product.list_product_detail && product.list_product_detail.length > 0){
+    if(product.isActive === '1' && product.list_product_detail && product.map_product_detail === 'list'){
       setSelectedProductDetail(product?.list_product_detail[0])
     }
-
-  }, [product]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = selectedProductDetail.config?.layout.filter((layout) => layout.value?.endpoint).map(async (layoutItem) => {
-        if(layoutItem.value?.endpoint) {
-          const url = layoutItem.value.endpoint.replace('{{interface}}', 'WEB')
-          const res = await api.get(url)
-          const id = layoutItem.id
-          return {...res.data, id}
-        }
-      })
-      const responses: Array<DataResponse> = await Promise.all(response || [])
-      setDataApiResponse(responses)
-      setSelectedPackage(responses[0]?.list[0])
-      responses.forEach((data) => {
-        const mapPayload = dataPayload.map((payload) => {
-          if(payload.id === data.id) {
-            return {
-              id: data.id,
-              value: data.default?.value || ''
-            }
-          }
-          return payload;
-        })
-        setDataPayload(mapPayload)
-      })
-    }
-    fetchData()
+    setDataPayload([])
+    fetchProductDetailLayout()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProductDetail]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = product.config?.layout.filter((layout) => layout.event?.endpoint).map(async (layoutItem) => {
-        if(layoutItem.event?.endpoint) {
-          const lastItem = dataPayload.pop()
-          const url = layoutItem.event.endpoint.replace(`{{${lastItem?.id}}}`, String(lastItem!.value))
-          const res = await api.get(url)
-          const id = layoutItem.event.set_value
-          return {...res.data, id}
-        }
-      })
-
-      const responses: Array<DataResponse> = await Promise.all(response || [])
-      // setDataApiResponse(unionBy(dataApiResponse, responses))
-      const updatedData = responses.map(response => {
-        const existing = dataApiResponse.find(item => item.id === response.id);
-        return existing ? { ...existing, ...response } : response;
-      });
-      setDataApiResponse([...dataApiResponse.filter(item => !responses.some(response => response.id === item.id)), ...updatedData]);
+    if(!isEmpty(dataPayload)){
+      fetchEventLayout()
     }
-
-    fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataPayload])
 
+  function upsertData<T extends { id: string }>(existingData: T[], newData: T[]): T[] {
+    if (!existingData || existingData.length === 0) {
+      return [...newData]
+    }
+    
+    if (!newData || newData.length === 0) {
+      return [...existingData]
+    }
+    
+    const dataMap = new Map(existingData.map(item => [item.id, item]))
+    
+    newData.forEach(item => {
+      dataMap.set(item.id, item)
+    });
+    
+    return Array.from(dataMap.values())
+  }
 
   const onHandleSelectedProductDetail = (keys: SharedSelection) => {
     const selectedKey = product.list_product_detail?.find((item) => item.product_detail === keys.currentKey)
@@ -142,28 +169,45 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
     }
   }
 
-  const onHandleSelectedDropdown = (e: React.ChangeEvent<HTMLSelectElement>, id: string) => {
-    setDataPayload(dataPayload => [...dataPayload, {
+  const onHandleSelectedDropdown = (event: React.ChangeEvent<HTMLSelectElement>, id: string) => {
+    const payload = {
       id,
-      value: e.target.value
-    }])
-  }
-
-  const onHandleSelectedKeyDropdown = (layoutItem: Layout): Array<string | undefined> | undefined => {
-    if(dataPayload.find(item => item.id === layoutItem.id)?.value){
-      return [(dataPayload.find(item => item.id === layoutItem.id)!.value)!.toString()]
-    } 
-    return undefined
-  }
-
-  const onHandleInputChange = debounce((e: React.ChangeEvent<HTMLInputElement>, id: string) => {
-    if(e.target.value.length > 3) {
-      setDataPayload([...dataPayload, {
-        id,
-        value: e.target.value
-      }])
+      value: event.target.value
     }
+    setDataPayload(upsertData(dataPayload, [payload]))
+  }
+
+  const selectedKeyDropdown = (layout: Layout): Array<string> => {
+    const foundItem = dataPayload.find(item => item.id === layout.id)?.value;
+    if (foundItem) {
+      return [foundItem.toString()];
+    }
+    return [""];
+  }
+
+  const onHandleInputChange = debounce((event: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const payload = {
+      id,
+      value: event.target.value
+    }
+    setDataPayload(upsertData(dataPayload, [payload]))
   }, 500)
+
+  const onHandleSelectPackage = (itemList: List, id: string) => {
+    setSelectedPackage(itemList)
+    const payload = {
+      id,
+      value: itemList.value
+    }
+    setDataPayload(upsertData(dataPayload, [payload]))
+  }
+
+  const onHandleClose = (onClose: () => void) => {
+    setSelectedPackage({} as List)
+    setDataPayload([])
+    setSelectedProductDetail({} as ListProductDetail)
+    onClose()
+  }
 
   const renderProductDetailComponent = ( layoutItem: Layout ) => {
     return (
@@ -171,7 +215,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
         layoutItem.is_number ? (
           <NumericFormat
             key={layoutItem.id}
-            id={layoutItem.id}
             allowLeadingZeros
             label={layoutItem.label}
             type="text"
@@ -181,15 +224,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
             maxLength={layoutItem.max_length !== 0 ?  layoutItem.max_length : undefined }
             minLength={layoutItem.min_length !== 0 ?  layoutItem.max_length : undefined }
             customInput={Input}
-            onChange={(e) => onHandleInputChange(e, layoutItem.id)}
+            onChange={(event) => onHandleInputChange(event, layoutItem.id)}
           />
         ) : (
           <Input 
             key={layoutItem.id}
-            id={layoutItem.id}
             type="text"
             label={layoutItem.label}
-            onChange={(e) => onHandleInputChange(e, layoutItem.id)}
+            onChange={(event) => onHandleInputChange(event, layoutItem.id)}
           />
         )
       ) : layoutItem.tipe === 'dropdown' ? (
@@ -198,9 +240,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
           label={layoutItem.label}
           items={dataApiResponse.find(item => item.id === layoutItem.id)?.list || []}
           isRequired
-          selectedKeys={onHandleSelectedKeyDropdown(layoutItem)?.filter((key): key is string => key !== undefined)}
+          selectedKeys={selectedKeyDropdown(layoutItem)}
           placeholder={layoutItem.placeholder}
-          onChange={(e) => onHandleSelectedDropdown(e, layoutItem.id)}
+          onChange={(event) => onHandleSelectedDropdown(event, layoutItem.id)}
         >
           {
             (item) => (
@@ -222,12 +264,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
                 .flatMap((data: DataResponse) => 
                   <div 
                     key={layoutItem.id}
-                    id={layoutItem.id} 
                     className="flex flex-col gap-2"
                   >
                     {
                       data.list.map((item) => (
-                        <div onClick={() => setSelectedPackage(item)} key={item.value} className={`p-4 border rounded-lg cursor-pointer space-y-2 ${selectedPackage?.value === item.value ? "bg-primary-100 border-primary" : "border-gray-200"}`}>
+                        <div onClick={() => onHandleSelectPackage(item,layoutItem.id)} key={item.value} className={`p-4 border rounded-lg cursor-pointer space-y-2 ${selectedPackage?.value === item.value ? "bg-primary-100 border-primary" : "border-gray-200"}`}>
                           <div className="text-sm text-gray-600 font-medium">{item.label}</div>
                           <div className="text-xs text-gray-600 font-medium">{item.desc}</div>
                           <div className="text-xs font-semibold">Rp. {formatThousands(item.price || '0')}</div>
@@ -242,12 +283,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
                 .flatMap((data: DataResponse) => 
                   <div
                     key={layoutItem.id}
-                    id={layoutItem.id}
                     className="grid grid-cols-3 gap-2"
                   >
                     {
                       data.list.map((item) => (
-                        <div onClick={() => setSelectedPackage(item)} key={item.value} className={`p-4 border rounded-lg cursor-pointer space-y-2 ${selectedPackage?.value === item.value ? "bg-primary-100 border-primary" : "border-gray-200"}`}>
+                        <div onClick={() => onHandleSelectPackage(item,layoutItem.id)} key={item.value} className={`p-4 border rounded-lg cursor-pointer space-y-2 ${selectedPackage?.value === item.value ? "bg-primary-100 border-primary" : "border-gray-200"}`}>
                           <div className="text-xs font-medium text-gray-600">{item.label}</div>
                           <div className="text-xs font-medium text-gray-600">{item.detail}</div>
                           <div className="text-xs font-medium">Rp. {formatThousands(item.price || '0')}</div>
@@ -257,7 +297,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
                   </div> 
                 )
       ) : layoutItem.tipe === 'hidden' ? (
-          <Input key={layoutItem.id} id={layoutItem.id} className="hidden" type="hidden" />
+          <Input key={layoutItem.id} className="hidden" type="hidden" />
         ) : (
           null
         )
@@ -366,7 +406,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ isOpen, onOpenChange, pro
               )}
             </DrawerBody>
             <DrawerFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
+              <Button color="danger" variant="light" onPress={() => onHandleClose(onClose)}>
                 Kembali
               </Button>
               <Button className={product.isActive === '0' ? 'hidden' : ''}  color="primary" onPress={onClose}>

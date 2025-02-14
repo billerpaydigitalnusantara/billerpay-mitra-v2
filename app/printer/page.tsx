@@ -7,6 +7,10 @@ import { PrinterIcon, ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/o
 import { NumericFormat } from "react-number-format";
 
 const Printer = () => {
+  const onHandleDownloadWCPP = () => {
+    window.open('https://drive.google.com/file/d/1B2vq3AhoySixbQYvGfnpcF-a_N-5Rrzd/view?usp=sharing', '_blank')
+  }
+
   return (
     <div className="bg-gray-100 w-full min-h-screen grid grid-cols-[1fr,1fr] grid-rows-[1fr, 2fr, 1fr] gap-4">
       <Header />
@@ -55,7 +59,7 @@ const Printer = () => {
         <h1 className="text-xl font-semibold tracking-wide">Download Driver Printer</h1>
         <Divider className="my-4"/>
         <p className="text-sm text-gray-600">Silahkan download dan install WCPP untuk dapat menggunakan printer Dot Matrix</p>
-        <Button startContent={<ArrowDownTrayIcon className="size-4"/>} color="default" className="mt-4">Download WCPP for Windows</Button>
+        <Button onPress={onHandleDownloadWCPP} startContent={<ArrowDownTrayIcon className="size-4"/>} color="default" className="mt-4">Download WCPP for Windows</Button>
       </div>
       <Footer/>
     </div>

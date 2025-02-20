@@ -6,14 +6,13 @@ import { Radio, RadioGroup, Select, SelectItem, Input, Button, Divider, Checkbox
 import { PrinterIcon, ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format";
 import usePersistantState from "@/states/persistant";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PrinterSettings } from "@/types";
 import { print } from "@/utils/print";
 import toast from "react-hot-toast";
 
 const Printer = () => {
-  const initialValue = localStorage.getItem('printerSettings')
-  const [printerSettings, setPrinterSettings] = usePersistantState<PrinterSettings>('printerSettings', initialValue ? JSON.parse(initialValue) : {
+  const [printerSettings, setPrinterSettings] = usePersistantState<PrinterSettings>('printerSettings', {
     auto: false,
     type: 'pdf',
     config: {
@@ -23,12 +22,30 @@ const Printer = () => {
       font: 12
     }
   })
+
   const [autoPrint, setAutoPrint] = useState<boolean>(printerSettings.auto)
   const [type, setType] = useState<string>(printerSettings.type)
   const [paper, setPaper] = useState<number>(printerSettings.config?.paper || 4)
   const [font, setFont] = useState<number>(printerSettings.config?.font || 12)
   const [space, setSpace] = useState<number>(printerSettings.config?.space || 1)
   const [spaceMatrix, setSpaceMatrix] = useState<number>(printerSettings.config?.spaceMatrix || 0)
+
+  useEffect(() => {
+    const initialValue = localStorage.getItem('printerSettings')
+    if(initialValue) {
+      setPrinterSettings(JSON.parse(initialValue))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    setAutoPrint(printerSettings.auto)
+    setType(printerSettings.type)
+    setPaper(printerSettings.config?.paper || 4)
+    setFont(printerSettings.config?.font || 12)
+    setSpace(printerSettings.config?.space || 1)
+    setSpaceMatrix(printerSettings.config?.spaceMatrix || 0)
+  }, [printerSettings])
 
   const onHandleDownloadWCPP = () => {
     window.open('https://drive.google.com/file/d/1B2vq3AhoySixbQYvGfnpcF-a_N-5Rrzd/view?usp=sharing', '_blank')
@@ -41,7 +58,7 @@ const Printer = () => {
   }
 
   const onHandleSave = () => {
-    setPrinterSettings({
+    const config = {
       auto: autoPrint,
       type: type,
       config: type === 'thermal' ? undefined : type === 'dotmatrix' ? { spaceMatrix: spaceMatrix } : {
@@ -49,8 +66,8 @@ const Printer = () => {
         font: font,
         paper: paper,
       }
-    })
-
+    }
+    setPrinterSettings(config)
     toast.success('Berhasil menyimpan settings printer')
   }
 

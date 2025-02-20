@@ -2,13 +2,60 @@
 
 import Header from "../components/header";
 import Footer from "../components/footer";
-import { Radio, RadioGroup, Select, SelectItem, Input, Button, Divider, Checkbox } from "@heroui/react";
+import { Radio, RadioGroup, Select, SelectItem, Input, Button, Divider, Checkbox, SharedSelection } from "@heroui/react";
 import { PrinterIcon, ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format";
+import usePersistantState from "@/states/persistant";
+import { useState } from "react";
+import { PrinterSettings } from "@/types";
+import { print } from "@/utils/print";
+import toast from "react-hot-toast";
 
 const Printer = () => {
+  const initialValue = localStorage.getItem('printerSettings')
+  const [printerSettings, setPrinterSettings] = usePersistantState<PrinterSettings>('printerSettings', initialValue ? JSON.parse(initialValue) : {
+    auto: false,
+    type: 'pdf',
+    config: {
+      spaceMatrix: 0,
+      space: 1,
+      paper: 4,
+      font: 12
+    }
+  })
+  const [autoPrint, setAutoPrint] = useState<boolean>(printerSettings.auto)
+  const [type, setType] = useState<string>(printerSettings.type)
+  const [paper, setPaper] = useState<number>(printerSettings.config?.paper || 4)
+  const [font, setFont] = useState<number>(printerSettings.config?.font || 12)
+  const [space, setSpace] = useState<number>(printerSettings.config?.space || 1)
+  const [spaceMatrix, setSpaceMatrix] = useState<number>(printerSettings.config?.spaceMatrix || 0)
+
   const onHandleDownloadWCPP = () => {
     window.open('https://drive.google.com/file/d/1B2vq3AhoySixbQYvGfnpcF-a_N-5Rrzd/view?usp=sharing', '_blank')
+  }
+
+  const onHandleSelectPaper = (keys: SharedSelection) => {
+    if(keys.currentKey) {
+      setPaper(Number(keys.currentKey))
+    }
+  }
+
+  const onHandleSave = () => {
+    setPrinterSettings({
+      auto: autoPrint,
+      type: type,
+      config: type === 'thermal' ? undefined : type === 'dotmatrix' ? { spaceMatrix: spaceMatrix } : {
+        space: space,
+        font: font,
+        paper: paper,
+      }
+    })
+
+    toast.success('Berhasil menyimpan settings printer')
+  }
+
+  const onTestPrint = () => {
+    print(['000000000000'])
   }
 
   return (
@@ -19,40 +66,80 @@ const Printer = () => {
         <Divider className="my-6 h-[2px]" />
         <div className="flex flex-col items-start gap-2">
           <h4 className="font-medium text-gray-600">Setting print otomatis</h4>
-          <Checkbox classNames={{ label: ["text-sm text-gray-500 font-medium"] }}>Print otomatis saat transaksi sukses</Checkbox>
+          <Checkbox isSelected={autoPrint} onValueChange={setAutoPrint} classNames={{ label: ["text-sm text-gray-500 font-medium"] }}>Print otomatis saat transaksi sukses</Checkbox>
         </div>
         <Divider className="my-6 h-[2px]" />
         <div className="mt-4">
-          <RadioGroup className="text-gray-700 font-semibold text-sm">
+          <RadioGroup value={type} onValueChange={setType} className="text-gray-700 font-semibold text-sm">
             <Radio classNames={{ label: ["text-sm font-medium text-gray-600"], base: [ 'my-1' ] }} value="dotmatrix">Dot Matrix</Radio>
+            {
+              type === 'dotmatrix' ? (
+                <div>
+                  <h4 className="font-medium text-gray-600">Tambah Spasi</h4>
+                  <NumericFormat customInput={Input} value={spaceMatrix} onValueChange={(values) => setSpaceMatrix(Number(values.value))} />
+                </div>
+              ) : null
+            }
             <Radio classNames={{ label: ["text-sm font-medium text-gray-600"], base: [ 'my-1' ] }} value="thermal">Thermal Printer</Radio>
             <Radio classNames={{ label: ["text-sm font-medium text-gray-600"], base: [ 'my-1' ] }} value="inkjet">Ink Jet</Radio>
+            {
+              type === 'inkjet' ? (
+              <div>
+                <div>
+                  <h4 className="font-medium text-gray-600">Setting Kertas</h4>
+                  <Select defaultSelectedKeys={['1']} selectedKeys={[paper.toString()]} onSelectionChange={onHandleSelectPaper} placeholder="Pilih kertas" className="w-full mt-2">
+                    <SelectItem key="1">1 Kertas 1 Struk</SelectItem>
+                    <SelectItem key="2">1 Kertas 2 Struk</SelectItem>
+                    <SelectItem key="3">1 Kertas 3 Struk</SelectItem>
+                    <SelectItem key="4">1 Kertas 4 Struk</SelectItem>
+                  </Select>
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-600">Ukuran font (px)</h4>
+                  <NumericFormat customInput={Input} defaultValue={12} value={font} onValueChange={(values) => setFont(Number(values.value))} placeholder="Masukan ukuran font" />
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-600">Spasi antar struk</h4>
+                  <NumericFormat customInput={Input} defaultValue={1} value={space} onValueChange={(values) => setSpace(Number(values.value))} placeholder="Masukan spasi antar struk" />
+                </div>
+                <div className="mt-4">
+                  <span className="text-green-700 text-sm font-medium">* Rekomendasi kertas A4</span>
+                </div>
+              </div>
+              ) : null
+            }
             <Radio classNames={{ label: ["text-sm font-medium text-gray-600"], base: [ 'my-1' ] }} value="pdf">PDF Format</Radio>
+            {
+              type === 'pdf' ? (
+              <div>
+                <div>
+                  <h4 className="font-medium text-gray-600">Setting Kertas</h4>
+                  <Select defaultSelectedKeys={['1']} selectedKeys={[paper.toString()]} onSelectionChange={onHandleSelectPaper} placeholder="Pilih kertas" className="w-full mt-2">
+                    <SelectItem key="1">1 Kertas 1 Struk</SelectItem>
+                    <SelectItem key="2">1 Kertas 2 Struk</SelectItem>
+                    <SelectItem key="3">1 Kertas 3 Struk</SelectItem>
+                    <SelectItem key="4">1 Kertas 4 Struk</SelectItem>
+                  </Select>
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-600">Ukuran font (px)</h4>
+                  <NumericFormat customInput={Input} defaultValue={12} value={font} onValueChange={(values) => setFont(Number(values.value))} placeholder="Masukan ukuran font" />
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-600">Spasi antar struk</h4>
+                  <NumericFormat customInput={Input} defaultValue={1} value={space} onValueChange={(values) => setSpace(Number(values.value))} placeholder="Masukan spasi antar struk" />
+                </div>
+                <div className="mt-4">
+                  <span className="text-green-700 text-sm font-medium">* Rekomendasi kertas A4</span>
+                </div>
+              </div>
+              ) : null
+            }
           </RadioGroup>
         </div>
-        <div className="mt-4">
-          <h4 className="font-medium text-gray-600">Setting Kertas</h4>
-          <Select placeholder="Pilih kertas" className="w-full mt-2">
-            <SelectItem value="11">1 Kertas 1 Struk</SelectItem>
-            <SelectItem value="12">1 Kertas 2 Struk</SelectItem>
-            <SelectItem value="13">1 Kertas 3 Struk</SelectItem>
-            <SelectItem value="14">1 Kertas 4 Struk</SelectItem>
-          </Select>
-        </div>
-        <div className="mt-4">
-          <h4 className="font-medium text-gray-600">Ukuran font (px)</h4>
-          <NumericFormat customInput={Input} placeholder="Masukan ukuran font" />
-        </div>
-        <div className="mt-4">
-          <h4 className="font-medium text-gray-600">Spasi antar struk</h4>
-          <NumericFormat customInput={Input} placeholder="Masukan spasi antar struk" />
-        </div>
-        <div className="mt-4">
-          <span className="text-green-700 text-sm font-medium">* Rekomendasi kertas A4</span>
-        </div>
         <div className="mt-4 flex gap-4">
-          <Button startContent={<PrinterIcon className="size-5" />} color="warning" className="mt-4">Printer Test</Button>
-          <Button startContent={<CheckIcon className="size-5" />} color="primary" className="mt-4">Simpan</Button>
+          <Button startContent={<PrinterIcon className="size-5" />} color="warning" className="mt-4" onPress={onTestPrint}>Printer Test</Button>
+          <Button startContent={<CheckIcon className="size-5" />} color="primary" className="mt-4" onPress={onHandleSave}>Simpan</Button>
         </div>
       </div>
       <div className="h-[calc(100vh-4rem-3rem-2rem)] mr-96 p-6 bg-white rounded-lg">

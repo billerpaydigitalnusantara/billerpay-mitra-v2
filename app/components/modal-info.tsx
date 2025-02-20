@@ -18,7 +18,7 @@ const ModalInfo: React.FC<ModalInfoProps> = ({ title, message, onCancel, isOpen,
           {title}
         </ModalHeader>
         <ModalBody>
-          {message}
+          <div className="border-separate" dangerouslySetInnerHTML={{__html: message}} />
         </ModalBody>
         <ModalFooter>
           <Button color="default" onPress={onCancel}>

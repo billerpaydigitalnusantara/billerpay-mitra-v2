@@ -243,7 +243,7 @@ const DataTransaksi = () => {
           )
       case "status":
           return (
-            <Chip className="capitalize" color={cellValue === 'SUKSES' ? 'success' : 'danger'} size="sm" variant="flat">
+            <Chip className="capitalize" color={cellValue === 'SUKSES' ? 'success' : cellValue === 'PENDING' ? 'warning' : 'danger'} size="sm" variant="flat">
               {cellValue}
             </Chip>
           )

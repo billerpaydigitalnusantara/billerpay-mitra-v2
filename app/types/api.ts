@@ -332,3 +332,24 @@ export interface DataTicketDeposit {
   norek_tujuan: string
   status: string
 }
+
+export interface PaymentResponse {
+  username: string
+  trace_id: string
+  reffPay: string
+  reff: string
+  product: string
+  product_detail: string
+  idpel: string
+  idpel_name: string
+  tagihan: string
+  admin_bank: string
+  total_tagihan: string
+  lembar: string
+  amount: string
+  distribusi_fee: string
+  datetime: string
+  response_code: string
+  response_message: string
+  saldo: number
+}
